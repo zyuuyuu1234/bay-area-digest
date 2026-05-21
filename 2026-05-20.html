@@ -3,132 +3,82 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <meta property="og:title" content="🌉 湾区每日探索 · 2026年5月20日"/>
-  <meta property="og:description" content="今日湾区精选：活动、美食、户外、艺术"/>
   <title>🌉 湾区每日探索 · 2026年5月20日</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;}
-    .thumbnail{width:100%;height:200px;object-fit:cover;border-radius:10px 10px 0 0;background:#f3f4f6;display:block;}
-    .no-thumb{height:0;}
+    .card-thumb{width:100%;height:180px;object-fit:cover;display:block;}
+    #modal-overlay{transition:opacity .2s;}
+    #modal-box{max-height:85vh;overflow-y:auto;}
+    .img-scroll{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
+    .img-scroll img{flex:0 0 auto;width:85vw;max-width:340px;height:260px;object-fit:cover;
+                     border-radius:10px;scroll-snap-align:start;}
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
+  <!-- Header -->
   <header class="bg-white border-b shadow-sm sticky top-0 z-10">
     <div class="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
       <div>
         <span class="text-lg font-bold text-gray-900">🌉 湾区每日探索</span>
         <span class="ml-2 text-sm text-gray-400">2026年5月20日</span>
       </div>
-      <a href="index.html" class="text-xs text-gray-400 hover:text-gray-700 border border-gray-200 rounded-full px-3 py-1 hover:border-gray-400 transition-colors">往期 →</a>
+      <a href="index.html"
+         class="text-xs text-gray-400 hover:text-gray-700 border border-gray-200
+                rounded-full px-3 py-1 hover:border-gray-400 transition-colors">往期 →</a>
     </div>
   </header>
 
+  <!-- Cards -->
   <main class="max-w-2xl mx-auto px-4 py-6 space-y-8">
     <section>
   <h2 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
     <span class="text-xl">🎉</span>活动与演出
   </h2>
-  <div class="space-y-4"><div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/6a088321000000003701f195.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「旧金山湾区5月活动✨杀糕节x马拉松x免费新展」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">五月份湾区超热闹，杀糕节、马拉松和免费新展一网打尽，懒人必备的活动清单。</p>
-    <a href="https://www.xiaohongshu.com/explore/6a088321000000003701f195" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2"><div onclick="openModal('https://www.xiaohongshu.com/explore/6a0ad3640000000010001c01')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/6a0ad3640000000010001c01.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「🍎本周长周末湾区精彩活动5/21-5/25」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">本周末就用得上，长周末活动一网打尽，先码后看绝对不亏。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/6a0ad3640000000010001c01.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「🍇本周长周末湾区精彩活动5/21-5/25」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">Memorial Day长周末就在眼前，这篇正好覆盖5/21-5/25，懒得查日历的看这一篇就够。</p>
-    <a href="https://www.xiaohongshu.com/explore/6a0ad3640000000010001c01" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/6a0de31d000000001002d000')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/6a0de31d000000001002d000.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「湾区5/22-5/25长周末活动| 嘉年华+夜市+市集+博物馆」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">嘉年华、夜市、市集、博物馆全打包，免费低价适合带家人朋友一起去。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/6a0d456b0000000038023384.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「5月的湾区太好逛了🔥码住这篇！」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">五月还没结束，作者整理了一波正在发生的好玩事，码住周末不愁没地方去。</p>
-    <a href="https://www.xiaohongshu.com/explore/6a0d456b0000000038023384" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69f3fd20000000003700cfb8')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69f3fd20000000003700cfb8.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「5月的湾区太好逛了🔥码住这篇！」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">5月湾区活动太丰富，这篇懒人合集帮你一次性整理好。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/6a0e3f85000000003700ff3d.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「湾区周末｜抽张角色卡，去百年前加州小镇生活」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">沉浸式体验百年前加州小镇生活，抽角色卡这种设定真的太适合周末换换脑子了。</p>
-    <a href="https://www.xiaohongshu.com/explore/6a0e3f85000000003700ff3d" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
-  </div>
-</div></div>
-</section>
-<section>
-  <h2 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
-    <span class="text-xl">🌿</span>户外自然
-  </h2>
-  <div class="space-y-4"><div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/69f3fd20000000003700cfb8.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「湾区摘水果超详细攻略🧑‍🌾任吃到爽‼️」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">桑葚草莓樱桃蓝莓全在线，五月正是U-Pick的黄金季，带上篮子出发吧。</p>
-    <a href="https://www.xiaohongshu.com/explore/69f3fd20000000003700cfb8" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/6a0cf101000000000f03ac01')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/6a0cf101000000000f03ac01.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「断更两个月，只因湾区近期线下活动太丰富😍」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">博主都因为活动太多断更，可见近期湾区线下有多热闹。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/6a052efc0000000006032180.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「湾区限定 | Mulberry U Pick」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">桑葚季就这么短，作者把注意事项一篇讲清楚，新手友好。</p>
-    <a href="https://www.xiaohongshu.com/explore/6a052efc0000000006032180" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
-  </div>
-</div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/6a0cf101000000000f03ac01.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「湾区周边冷门Getaway❓8个冷门Day Trip打卡地」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">8个冷门Day Trip，避开人潮的同时还能挖到宝，适合不爱凑热闹的人。</p>
-    <a href="https://www.xiaohongshu.com/explore/6a0cf101000000000f03ac01" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
-  </div>
-</div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/6a02bad9000000003502ba00.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「加州隐藏宝藏 🌲Portola Valley自驾」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">Portola Valley的红杉公路自驾，离半岛近又安静，绝佳的精神充电站。</p>
-    <a href="https://www.xiaohongshu.com/explore/6a02bad9000000003502ba00" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69f5085e0000000013020400')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69f5085e0000000013020400.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「五月上半月湾区演出信息」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">想看演出的朋友必收，南湾半岛中英文剧目都覆盖。</p>
   </div>
 </div></div>
 </section>
@@ -136,105 +86,99 @@
   <h2 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
     <span class="text-xl">🍜</span>美食探店
   </h2>
-  <div class="space-y-4"><div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/69d36b5e0000000023022655.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「重生之在Cupertino一周吃什么」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">Cupertino打工人续命指南，一周不重样的吃饭名单，太懂码农胃了。</p>
-    <a href="https://www.xiaohongshu.com/explore/69d36b5e0000000023022655" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2"><div onclick="openModal('https://www.xiaohongshu.com/explore/69fe7b4700000000380236bc')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69fe7b4700000000380236bc.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「湾区｜开车一小时也要去吃的贵州烧椒鸡！好吃」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">能让人开车一小时去吃的店，必有它的过人之处，重口味爱好者别错过。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/69f98a66000000000f03ac00.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「离开湾区会超想念的湖南菜」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">辣党的福音，作者亲测会念念不忘的湖南菜，看名字就饿了。</p>
-    <a href="https://www.xiaohongshu.com/explore/69f98a66000000000f03ac00" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/6975c78d0000000022032010')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/6975c78d0000000022032010.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「旧金山 $98 tasting menu 无敌好吃 😄」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">$98的tasting menu在SF算性价比之选，约会或周末犒劳自己都合适。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/6886e58a000000001c030cd2.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「湾区｜开车一小时也要去吃的贵州烧椒鸡！好吃」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">能让人愿意开一小时车的烧椒鸡，作为吃货必须收藏起来。</p>
-    <a href="https://www.xiaohongshu.com/explore/6886e58a000000001c030cd2" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69d2c877000000001a026e1c')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69d2c877000000001a026e1c.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「做饭博主今年在湾区吃到的好店合集🔢」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">做饭博主认证的好店合集，挑剔的味蕾说好那基本不会踩雷。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/684f675c0000000022005c84.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「旧金山 $98 tasting menu 无敌好吃 😋」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">$98的tasting menu在SF算极有性价比，约会日或庆祝小日子都很合适。</p>
-    <a href="https://www.xiaohongshu.com/explore/684f675c0000000022005c84" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69eafad3000000001e00f796')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69eafad3000000001e00f796.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「SF最新韩式tapas小店」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">新开的韩式tapas小店，想换新口味的可以来打卡。</p>
+  </div>
+</div>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/6a0d456b0000000038023384')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/6a0d456b0000000038023384.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「San Jose大统华超市将于06/18开张！」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">T&amp;T加州首店即将开张，亚洲超市爱好者请准备好钱包。</p>
   </div>
 </div></div>
 </section>
 <section>
   <h2 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
-    <span class="text-xl">💎</span>宝藏地点
+    <span class="text-xl">🌲</span>户外自然
   </h2>
-  <div class="space-y-4"><div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/69f255d50000000010001c01.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「湾区茶室，适合找个雨后点一壶茶，读一本书」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">雨后的湾区茶室，一壶茶一本书，给城市生活留一点慢节奏。</p>
-    <a href="https://www.xiaohongshu.com/explore/69f255d50000000010001c01" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2"><div onclick="openModal('https://www.xiaohongshu.com/explore/6a0151590000000010001c01')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/6a0151590000000010001c01.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「湾区限定｜Mulberry U Pick」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">桑葚季限定体验，自己采摘的乐趣是城市里少有的浪漫。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/68e4c3d70000000003034b11.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「湾区坐渡轮去美国最富老钱小镇一日游 🎡」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">渡轮去Tiburon这种老钱小镇，路上的风景和到了以后的氛围都很疗愈。</p>
-    <a href="https://www.xiaohongshu.com/explore/68e4c3d70000000003034b11" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69f255d50000000010001c01')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69f255d50000000010001c01.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「湾区周边❗冷门Getaway 8天Day Trip打卡地」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">8个冷门Day Trip地点，避开人潮的小众路线最适合周末逃离。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/69fad04e000000003601f8bf.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「三番周末逛街🌟|Fillmore Street真宝藏呀！」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">Fillmore Street被严重低估，小店密度高，逛街拍照都很出片。</p>
-    <a href="https://www.xiaohongshu.com/explore/69fad04e000000003601f8bf" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69fafa48000000001b0220f2')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69fafa48000000001b0220f2.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「旧金山 Land's End 陆地尽头」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">Land's End的海岸线和落日是SF最治愈的角落之一。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/69a26118000000002800beca.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「旧金山市区里的森林秘境」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">在SF市区里居然藏着森林秘境，城市与自然无缝切换的体验非常奇妙。</p>
-    <a href="https://www.xiaohongshu.com/explore/69a26118000000002800beca" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/696dafaa000000001a01f297')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/696dafaa000000001a01f297.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「SF湾区走过最棒的trail！走完爱上了SF!」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">博主认证最棒的trail，能让人重新爱上湾区的那种。</p>
+  </div>
+</div>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69f179a50000000036032adc')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69f179a50000000036032adc.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「加州隐藏宝藏 🌲Portola Valley自驾」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">半岛山间的Portola Valley，自驾路线安静又出片。</p>
   </div>
 </div></div>
 </section>
@@ -242,49 +186,176 @@
   <h2 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
     <span class="text-xl">🎨</span>艺术与文化
   </h2>
-  <div class="space-y-4"><div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/6a020d79000000003502291c.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「不可错过的好展，坐标旧金山湾区」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">湾区最近的好展精选，喜欢看展的可以直接收藏。</p>
-    <a href="https://www.xiaohongshu.com/explore/6a020d79000000003502291c" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2"><div onclick="openModal('https://www.xiaohongshu.com/explore/6a07a7f00000000008030085')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/6a07a7f00000000008030085.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「湾区生活 | SF莫奈画展」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">莫奈画展正在SF展出，喜欢印象派的朋友千万别错过。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/69adcd4b000000001d010118.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「湾区桃花源记——Djerassi艺术徒步」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">Djerassi艺术徒步把户外和艺术装置结合，是非常独特的湾区体验。</p>
-    <a href="https://www.xiaohongshu.com/explore/69adcd4b000000001d010118" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69eec5430000000013020400')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69eec5430000000013020400.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「盐田千春🎃也来湾区办展了！」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">盐田千春的红线装置艺术终于来湾区，时隔7年再相见。</p>
   </div>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <img src="images/69880a610000000009038644.webp" class="thumbnail" loading="lazy"
-       onerror="this.style.display='none'" alt=""/>
-  <div class="p-4">
-    <p class="font-semibold text-gray-900 text-sm leading-snug">「推荐一家旧金山我很爱的手作店」</p>
-    <p class="text-gray-600 text-sm mt-1 leading-relaxed">手作店有种慢下来的力量，适合想避开打卡式旅游的人。</p>
-    <a href="https://www.xiaohongshu.com/explore/69880a610000000009038644" target="_blank"
-       class="inline-block mt-3 text-xs font-medium text-orange-500 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-full px-3 py-1 transition-colors">
-      查看原帖 →
-    </a>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/6a03d5e7000000003701ffcf')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/6a03d5e7000000003701ffcf.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「Beeple新展在湾区Palo Alto开幕🥂」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">数字艺术大佬Beeple在Palo Alto的新展，科技与艺术的交汇点。</p>
+  </div>
+</div>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69fffc3d000000003701e11f')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69fffc3d000000003701e11f.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「湾区 | SF Decorator Showcase 年度展又来了」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">家居设计爱好者的年度盛事，看顶级设计师如何改造老宅。</p>
+  </div>
+</div>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69c4cc710000000028009dab')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69c4cc710000000028009dab.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「湾区宝藏免费艺术馆｜斯坦福cantor艺术馆」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">免费的Cantor艺术馆是半岛的宝藏，逛完还能在斯坦福校园散步。</p>
+  </div>
+</div></div>
+</section>
+<section>
+  <h2 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+    <span class="text-xl">💎</span>宝藏地点
+  </h2>
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2"><div onclick="openModal('https://www.xiaohongshu.com/explore/69c1a7e2000000002800a086')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69c1a7e2000000002800a086.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「湾区周末｜Jackson Square是sf最美街区吧」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">Jackson Square被称为SF最美街区，红砖小楼很有欧洲味。</p>
+  </div>
+</div>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/68edd64c0000000005001b4e')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/68edd64c0000000005001b4e.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「三番周末逛街🌟Fillmore Street真宝藏呀！」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">Fillmore Street的小店密集又有品味，周末闲逛绝佳路线。</p>
+  </div>
+</div>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/6948bd44000000001e031458')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/6948bd44000000001e031458.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「湾区茶室，适合找个雨后点一壶茶，读一本书」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">雨后的茶室+一本书，这种小确幸在湾区其实并不常有。</p>
+  </div>
+</div>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/69adcd4b000000001d010118')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/69adcd4b000000001d010118.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「湾区桃花源记——Djerassi艺术徒步」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">Djerassi艺术徒步把户外和雕塑结合，是半岛的小众桃花源。</p>
+  </div>
+</div>
+<div onclick="openModal('https://www.xiaohongshu.com/explore/68905bfb000000002303be62')"
+     class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden
+            cursor-pointer hover:shadow-md hover:border-orange-200 transition-all active:scale-95">
+  <img src="images/68905bfb000000002303be62.webp" class="card-thumb" loading="lazy" onerror="this.style.display='none'" alt=""/>
+  <div class="p-3">
+    <p class="text-gray-900 text-xs font-semibold leading-snug line-clamp-2">「旧金山市区里的森林秘境」</p>
+    <p class="text-gray-500 text-xs mt-1 line-clamp-2">市中心居然藏着森林秘境，城市探索控不可错过。</p>
   </div>
 </div></div>
 </section>
   </main>
 
   <footer class="max-w-2xl mx-auto px-4 py-8 text-center text-xs text-gray-400 border-t mt-4">
-    内容来源于小红书公开帖子 · 出行前请点击原帖确认最新时间和地点信息
-    <div class="mt-2">搜索词：湾区活动 · 旧金山周末 · 湾区好去处 · 旧金山好玩 · 湾区展览 · 湾区美食 · 旧金山景点</div>
+    内容来源于小红书公开帖子 · 出行前请点击原帖确认最新信息
+    <div class="mt-1">搜索词：湾区活动 · 旧金山周末 · 湾区好去处 · 旧金山好玩 · 湾区展览 · 湾区美食 · 旧金山景点</div>
   </footer>
 
+  <!-- Modal overlay -->
+  <div id="modal-overlay"
+       class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-end justify-center"
+       onclick="closeModal(event)">
+    <div id="modal-box"
+         class="bg-white w-full max-w-2xl rounded-t-2xl p-5 pb-8 relative">
+      <button onclick="closeModal()"
+              class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
+
+      <!-- Image carousel -->
+      <div id="modal-images" class="img-scroll mb-4 -mx-1"></div>
+
+      <!-- Content -->
+      <p id="modal-quote"  class="font-bold text-gray-900 text-base mb-1"></p>
+      <p id="modal-desc"   class="text-gray-600 text-sm mb-3"></p>
+      <p id="modal-text"   class="text-gray-700 text-sm leading-relaxed whitespace-pre-line border-t pt-3 mb-3"></p>
+      <div id="modal-tags" class="flex flex-wrap gap-1 mb-4 text-xs text-orange-500"></div>
+
+      <!-- XHS link — opens web, not app -->
+      <a id="modal-link" href="#" target="_blank"
+         onclick="return openWeb(this.href)"
+         class="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white
+                font-semibold rounded-xl py-3 transition-colors text-sm">
+        在小红书网页版查看完整帖子 →
+      </a>
+    </div>
+  </div>
+
+  <!-- Post data + JS -->
+  <script>
+    const POSTS = {"https://www.xiaohongshu.com/explore/6a0ad3640000000010001c01": {"quote": "「🍎本周长周末湾区精彩活动5/21-5/25」", "description": "本周末就用得上，长周末活动一网打尽，先码后看绝对不亏。", "full_text": "", "thumbnail": "images/6a0ad3640000000010001c01.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/6a0de31d000000001002d000": {"quote": "「湾区5/22-5/25长周末活动| 嘉年华+夜市+市集+博物馆」", "description": "嘉年华、夜市、市集、博物馆全打包，免费低价适合带家人朋友一起去。", "full_text": "", "thumbnail": "images/6a0de31d000000001002d000.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69f3fd20000000003700cfb8": {"quote": "「5月的湾区太好逛了🔥码住这篇！」", "description": "5月湾区活动太丰富，这篇懒人合集帮你一次性整理好。", "full_text": "", "thumbnail": "images/69f3fd20000000003700cfb8.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/6a0cf101000000000f03ac01": {"quote": "「断更两个月，只因湾区近期线下活动太丰富😍」", "description": "博主都因为活动太多断更，可见近期湾区线下有多热闹。", "full_text": "", "thumbnail": "images/6a0cf101000000000f03ac01.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69f5085e0000000013020400": {"quote": "「五月上半月湾区演出信息」", "description": "想看演出的朋友必收，南湾半岛中英文剧目都覆盖。", "full_text": "", "thumbnail": "images/69f5085e0000000013020400.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": ["#中文", "#经典改编"]}, "https://www.xiaohongshu.com/explore/69fe7b4700000000380236bc": {"quote": "「湾区｜开车一小时也要去吃的贵州烧椒鸡！好吃」", "description": "能让人开车一小时去吃的店，必有它的过人之处，重口味爱好者别错过。", "full_text": "", "thumbnail": "images/69fe7b4700000000380236bc.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/6975c78d0000000022032010": {"quote": "「旧金山 $98 tasting menu 无敌好吃 😄」", "description": "$98的tasting menu在SF算性价比之选，约会或周末犒劳自己都合适。", "full_text": "", "thumbnail": "images/6975c78d0000000022032010.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69d2c877000000001a026e1c": {"quote": "「做饭博主今年在湾区吃到的好店合集🔢」", "description": "做饭博主认证的好店合集，挑剔的味蕾说好那基本不会踩雷。", "full_text": "", "thumbnail": "images/69d2c877000000001a026e1c.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69eafad3000000001e00f796": {"quote": "「SF最新韩式tapas小店」", "description": "新开的韩式tapas小店，想换新口味的可以来打卡。", "full_text": "", "thumbnail": "images/69eafad3000000001e00f796.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/6a0d456b0000000038023384": {"quote": "「San Jose大统华超市将于06/18开张！」", "description": "T&T加州首店即将开张，亚洲超市爱好者请准备好钱包。", "full_text": "", "thumbnail": "images/6a0d456b0000000038023384.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/6a0151590000000010001c01": {"quote": "「湾区限定｜Mulberry U Pick」", "description": "桑葚季限定体验，自己采摘的乐趣是城市里少有的浪漫。", "full_text": "", "thumbnail": "images/6a0151590000000010001c01.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69f255d50000000010001c01": {"quote": "「湾区周边❗冷门Getaway 8天Day Trip打卡地」", "description": "8个冷门Day Trip地点，避开人潮的小众路线最适合周末逃离。", "full_text": "", "thumbnail": "images/69f255d50000000010001c01.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": ["#BAY AREA"]}, "https://www.xiaohongshu.com/explore/69fafa48000000001b0220f2": {"quote": "「旧金山 Land's End 陆地尽头」", "description": "Land's End的海岸线和落日是SF最治愈的角落之一。", "full_text": "", "thumbnail": "images/69fafa48000000001b0220f2.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/696dafaa000000001a01f297": {"quote": "「SF湾区走过最棒的trail！走完爱上了SF!」", "description": "博主认证最棒的trail，能让人重新爱上湾区的那种。", "full_text": "", "thumbnail": "images/696dafaa000000001a01f297.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69f179a50000000036032adc": {"quote": "「加州隐藏宝藏 🌲Portola Valley自驾」", "description": "半岛山间的Portola Valley，自驾路线安静又出片。", "full_text": "", "thumbnail": "images/69f179a50000000036032adc.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/6a07a7f00000000008030085": {"quote": "「湾区生活 | SF莫奈画展」", "description": "莫奈画展正在SF展出，喜欢印象派的朋友千万别错过。", "full_text": "", "thumbnail": "images/6a07a7f00000000008030085.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69eec5430000000013020400": {"quote": "「盐田千春🎃也来湾区办展了！」", "description": "盐田千春的红线装置艺术终于来湾区，时隔7年再相见。", "full_text": "", "thumbnail": "images/69eec5430000000013020400.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/6a03d5e7000000003701ffcf": {"quote": "「Beeple新展在湾区Palo Alto开幕🥂」", "description": "数字艺术大佬Beeple在Palo Alto的新展，科技与艺术的交汇点。", "full_text": "", "thumbnail": "images/6a03d5e7000000003701ffcf.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69fffc3d000000003701e11f": {"quote": "「湾区 | SF Decorator Showcase 年度展又来了」", "description": "家居设计爱好者的年度盛事，看顶级设计师如何改造老宅。", "full_text": "", "thumbnail": "images/69fffc3d000000003701e11f.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69c4cc710000000028009dab": {"quote": "「湾区宝藏免费艺术馆｜斯坦福cantor艺术馆」", "description": "免费的Cantor艺术馆是半岛的宝藏，逛完还能在斯坦福校园散步。", "full_text": "", "thumbnail": "images/69c4cc710000000028009dab.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69c1a7e2000000002800a086": {"quote": "「湾区周末｜Jackson Square是sf最美街区吧」", "description": "Jackson Square被称为SF最美街区，红砖小楼很有欧洲味。", "full_text": "", "thumbnail": "images/69c1a7e2000000002800a086.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/68edd64c0000000005001b4e": {"quote": "「三番周末逛街🌟Fillmore Street真宝藏呀！」", "description": "Fillmore Street的小店密集又有品味，周末闲逛绝佳路线。", "full_text": "", "thumbnail": "images/68edd64c0000000005001b4e.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/6948bd44000000001e031458": {"quote": "「湾区茶室，适合找个雨后点一壶茶，读一本书」", "description": "雨后的茶室+一本书，这种小确幸在湾区其实并不常有。", "full_text": "", "thumbnail": "images/6948bd44000000001e031458.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/69adcd4b000000001d010118": {"quote": "「湾区桃花源记——Djerassi艺术徒步」", "description": "Djerassi艺术徒步把户外和雕塑结合，是半岛的小众桃花源。", "full_text": "", "thumbnail": "images/69adcd4b000000001d010118.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}, "https://www.xiaohongshu.com/explore/68905bfb000000002303be62": {"quote": "「旧金山市区里的森林秘境」", "description": "市中心居然藏着森林秘境，城市探索控不可错过。", "full_text": "", "thumbnail": "images/68905bfb000000002303be62.webp", "all_images": ["https://sns-avatar-qc.xhscdn.com/avatar/529594cd91bbf4c43608131bf9134bdc.jpg?imageView2/2/w/360/format/webp"], "hashtags": []}};
+
+    function openModal(url) {
+      const p = POSTS[url];
+      if (!p) return;
+      document.getElementById('modal-quote').textContent = p.quote;
+      document.getElementById('modal-desc').textContent  = p.description;
+      document.getElementById('modal-text').textContent  = p.full_text || '';
+      document.getElementById('modal-text').style.display = p.full_text ? '' : 'none';
+
+      const tags = document.getElementById('modal-tags');
+      tags.innerHTML = (p.hashtags||[]).map(t => `<span class="bg-orange-50 rounded-full px-2 py-0.5">${t}</span>`).join('');
+
+      const imgs = document.getElementById('modal-images');
+      const allImgs = p.all_images && p.all_images.length ? p.all_images : (p.thumbnail ? [p.thumbnail] : []);
+      imgs.innerHTML = allImgs.map(src => `<img src="${src}" loading="lazy" onerror="this.remove()"/>`).join('');
+      imgs.style.display = allImgs.length ? '' : 'none';
+
+      document.getElementById('modal-link').href = url;
+      const overlay = document.getElementById('modal-overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== document.getElementById('modal-overlay')) return;
+      document.getElementById('modal-overlay').classList.add('hidden');
+      document.getElementById('modal-overlay').classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    // Force open in Safari/browser instead of app on iOS
+    function openWeb(url) {
+      window.location.href = url;
+      return false;
+    }
+  </script>
 </body>
 </html>
