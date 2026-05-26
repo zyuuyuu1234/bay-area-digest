@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>🌉 湾区每日探索 · 2026年5月25日</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;}
+    #sheet-box{max-height:85vh;overflow-y:auto;}
+    .entity-ref{
+      color:#ea580c; font-weight:600; cursor:pointer;
+      text-decoration:underline; text-decoration-color:#fed7aa;
+      text-decoration-thickness:2px; text-underline-offset:3px;
+      transition:text-decoration-color .15s;
+    }
+    .entity-ref:hover{text-decoration-color:#ea580c;}
+    .token{
+      display:inline-flex; align-items:center;
+      background:#fff7ed; border:1px solid #fed7aa; color:#c2410c;
+      font-size:0.75rem; font-weight:500;
+      padding:0.05rem 0.5rem; border-radius:9999px;
+      cursor:pointer; transition:all .15s;
+      margin:0 1px; vertical-align:0.05em; white-space:nowrap;
+    }
+    .token:hover{background:#ffedd5; border-color:#fdba74;}
+    .tab{
+      padding:0.5rem 1rem; font-size:0.875rem; font-weight:500;
+      border-bottom:2px solid transparent; color:#6b7280; cursor:pointer;
+      transition:color .15s, border-color .15s;
+    }
+    .tab:hover:not(.disabled){color:#374151;}
+    .tab.active{color:#ea580c; border-bottom-color:#ea580c;}
+    .tab.disabled{color:#d1d5db; cursor:not-allowed;}
+    .section-heading{
+      font-size:1.25rem; font-weight:700; color:#111827;
+      margin-bottom:0.75rem; letter-spacing:-0.01em;
+    }
+    .section-body p{margin-bottom:0.75rem;}
+    .section-body p:last-child{margin-bottom:0;}
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <header class="bg-white border-b shadow-sm sticky top-0 z-10">
+    <div class="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div>
+        <span class="text-lg font-bold text-gray-900">🌉 湾区每日探索</span>
+        <span class="ml-2 text-sm text-gray-400">2026年5月25日</span>
+      </div>
+      <a href="index.html"
+         class="text-xs text-gray-400 hover:text-gray-700 border border-gray-200
+                rounded-full px-3 py-1 hover:border-gray-400 transition-colors">往期 →</a>
+    </div>
+    <div class="max-w-2xl mx-auto px-4 flex gap-1 border-t border-gray-100">
+      <div class="tab active" data-tab="read">阅读</div>
+      <div class="tab disabled" data-tab="map" title="即将上线">地图</div>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-6">
+    <div id="pane-read" class="space-y-8 leading-relaxed text-gray-800 text-[15px]">
+      <section>
+  <h2 class="section-heading">长周末压轴：先把活动单收好</h2>
+  <div class="section-body"><p>Memorial Day长周末进入最后一天，如果你还在犹豫今天去哪，<span class="entity-ref" onclick="openSheet('e1')">长周末活动指南</span>几乎覆盖了所有你能想到的免费选项——Carnaval游行、夜市、市集和借着假日免门票的博物馆 <span class="token" onclick="openSheet('e1')">San Francisco · 5/22-5/25</span>。看完今天的，不妨顺手收藏<span class="entity-ref" onclick="openSheet('e2')">下周活动预告</span>，把下周的节奏也提前排好 <span class="token" onclick="openSheet('e2')">5/26-5/31</span>。</p></div>
+</section>
+<section>
+  <h2 class="section-heading">看展周：从红线到数字海浪</h2>
+  <div class="section-body"><p>今年春天湾区的展览阵容意外地强。最值得专程的是<span class="entity-ref" onclick="openSheet('e3')">盐田千春个展</span>，红线编织的房间走进去就出不来 <span class="token" onclick="openSheet('e3')">SOMA</span>；如果你更偏爱数字艺术，南湾的<span class="entity-ref" onclick="openSheet('e4')">Beeple 新展</span>是另一种语言 <span class="token" onclick="openSheet('e4')">Palo Alto</span>。想安静下来的话，<span class="entity-ref" onclick="openSheet('e5')">沉浸冥想展</span>用光与声做了一场冥想 。</p>
+<p>喜欢逛建筑和室内的，每年一度的<span class="entity-ref" onclick="openSheet('e6')">Decorator Showcase</span>又开了 <span class="token" onclick="openSheet('e6')">Pacific Heights</span>；想读点城市背后的故事，<span class="entity-ref" onclick="openSheet('e7')">侨批文化展</span>在中国城展出早期华侨的家书，是这周最戳人的一站 <span class="token" onclick="openSheet('e7')">Chinatown</span>。</p></div>
+</section>
+<section>
+  <h2 class="section-heading">出城透气：山、海、果园三选一</h2>
+  <div class="section-body"><p>长周末最后一天天气不错，可以选个方向出城。南下走280，<span class="entity-ref" onclick="openSheet('e8')">Djerassi 艺术徒步</span>把山林徒步和大型装置艺术揉在一起 <span class="token" onclick="openSheet('e8')">Woodside · 周末</span>；北上过金门大桥，<span class="entity-ref" onclick="openSheet('e9')">Rodeo Beach</span>的彩石海滩永远治愈 <span class="token" onclick="openSheet('e9')">Marin Headlands</span>。</p>
+<p>东边的<span class="entity-ref" onclick="openSheet('e10')">Brentwood 采摘</span>五月正是桑葚樱桃同台 <span class="token" onclick="openSheet('e10')">Brentwood · 五月</span>；想坐船的话，从Ferry Building出发的<span class="entity-ref" onclick="openSheet('e11')">老钱小镇渡轮游</span>是个轻松的半日方案 <span class="token" onclick="openSheet('e11')">Tiburon</span>。还想再奢侈一点、想一觉睡到Russian River边的森林里，那就预定<span class="entity-ref" onclick="openSheet('e12')">Dawn Ranch</span> <span class="token" onclick="openSheet('e12')">Guerneville · 周末</span>。</p></div>
+</section>
+<section>
+  <h2 class="section-heading">在城里慢慢晃：三个街区的不同表情</h2>
+  <div class="section-body"><p>如果只想在SF市区随便走走，三个街区各有性格。<span class="entity-ref" onclick="openSheet('e13')">Hayes Valley 逛街</span>集中了小众设计师店和咖啡馆 <span class="token" onclick="openSheet('e13')">Hayes Valley</span>；<span class="entity-ref" onclick="openSheet('e14')">Mission 漫游</span>则带你避开Valencia主街，去看18th和Florida一带真正的本地生活 <span class="token" onclick="openSheet('e14')">Mission</span>。想吹海风看博物馆，<span class="entity-ref" onclick="openSheet('e15')">Lands End 路线</span>是经典又不会出错的路线 <span class="token" onclick="openSheet('e15')">Outer Richmond</span>。</p>
+<p>逛累了，找个有故事的角落坐下——Fort Mason里的<span class="entity-ref" onclick="openSheet('e16')">The Interval</span>是酒吧也是图书馆，适合压轴 <span class="token" onclick="openSheet('e16')">Fort Mason</span>。</p></div>
+</section>
+<section>
+  <h2 class="section-heading">吃饭这件大事</h2>
+  <div class="section-body"><p>最近朋友圈里讨论度最高的几家餐厅都值得一试。Tapas爱好者一定要去<span class="entity-ref" onclick="openSheet('e17')">Soralla 西班牙菜</span> ；喜欢气氛松弛的法餐，<span class="entity-ref" onclick="openSheet('e18')">懒熊新Bistro</span>是新晋黑马 。饭后想喝一杯，<span class="entity-ref" onclick="openSheet('e19')">清酒小铺</span>店主选酒很有想法 。最后留一个给爱凑热闹的你——<span class="entity-ref" onclick="openSheet('e20')">新晋排队点</span>是这周大家都在排的新地方 。</p></div>
+</section>
+    </div>
+    <div id="pane-map" class="hidden text-center text-gray-400 py-16">
+      <div class="text-4xl mb-2">🗺️</div>
+      <div class="text-sm">地图视图即将上线</div>
+    </div>
+  </main>
+
+  <footer class="max-w-2xl mx-auto px-4 py-8 text-center text-xs text-gray-400 border-t mt-4">
+    内容来源于小红书公开帖子 · 出行前请点击原帖确认最新信息
+    <div class="mt-1">搜索词：湾区活动 · 旧金山周末 · 湾区好去处 · 旧金山好玩 · 湾区展览 · 湾区美食 · 旧金山景点</div>
+  </footer>
+
+  <!-- Bottom sheet -->
+  <div id="sheet-overlay"
+       class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-end justify-center"
+       onclick="closeSheet(event)">
+    <div id="sheet-box"
+         class="bg-white w-full max-w-2xl rounded-t-2xl p-5 pb-8 relative">
+      <button onclick="closeSheet()"
+              class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
+      <img id="sheet-img" src="" alt=""
+           class="w-full rounded-xl mb-4 object-cover max-h-64"
+           onerror="this.style.display='none'" style="display:none"/>
+      <p id="sheet-quote"  class="font-bold text-gray-900 text-base mb-1"></p>
+      <p id="sheet-desc"   class="text-orange-600 text-sm mb-3 leading-relaxed"></p>
+      <div id="sheet-chips" class="flex flex-wrap gap-1.5 mb-3"></div>
+      <p id="sheet-text"   class="text-gray-700 text-sm leading-relaxed whitespace-pre-line border-t pt-3 mb-3"></p>
+      <div id="sheet-tags" class="flex flex-wrap gap-1 mb-4 text-xs text-orange-500"></div>
+      <a id="sheet-link" href="#"
+         onclick="window.open(this.href,'_blank','noopener'); return false;"
+         class="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white
+                font-semibold rounded-xl py-3 transition-colors text-sm">
+        在小红书网页版查看完整帖子 →
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const ENTITIES = {"e1": {"id": "e1", "name": "长周末活动指南", "url": "https://www.xiaohongshu.com/explore/6a0de31d000000001002d000", "quote": "「湾区5/22-5/25长周末活动| 嘉年华+夜市+市集+博物馆」", "description": "五月长周末一站式攻略，嘉年华、夜市、市集和免费博物馆全覆盖，适合全家出动。", "neighborhood": "San Francisco", "time_window": "5/22-5/25", "price": "免费", "themes": ["活动", "文化"], "thumbnail": "images/6a0de31d000000001002d000.webp", "snippet": "旧金山5月嘉年华、夜市、免费艺术展等多元活动，适合家庭参与、免费或低票价体验多元文化展览。\n华人资讯网\n5天前", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/6a0de31d000000001002d000?xsec_token=ABTH9whxnIkXJf3U5FiUNLm9buZyaixq37H9ddXizK-v4%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}, "e2": {"id": "e2", "name": "下周活动预告", "url": "https://www.xiaohongshu.com/explore/6a0feee50000000013020401", "quote": "「✨湾区本周精彩活动5/26-5/31」", "description": "长周末过后还想继续浪？这份5/26-5/31的活动清单可以接力。", "neighborhood": null, "time_window": "5/26-5/31", "price": null, "themes": ["活动"], "thumbnail": "images/6a0feee50000000013020401.webp", "snippet": "香榛小葡萄\n1小时前", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/6a0feee50000000013020401?xsec_token=ABj1_yPAQbcmAA7yFjJzMRN9ZgEz6CvrBj6EEr9DPVNQU%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}, "e3": {"id": "e3", "name": "盐田千春个展", "url": "https://www.xiaohongshu.com/explore/69f968a8000000003802193f", "quote": "「旧金山湾区｜盐田千春新展实话实说...」", "description": "红线编织的标志性装置终于来到湾区，沉浸式体验值得专程一趟。", "neighborhood": "SOMA", "time_window": null, "price": "$$", "themes": ["艺术", "文化"], "thumbnail": "images/69f968a8000000003802193f.webp", "snippet": "m\n04-05", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/69f968a8000000003802193f?xsec_token=ABqFauT8nR3QchWrC5eR2lQg17tYiLhG_9qLByTvwlR3s%3D&xsec_source=", "neighborhood_canonical": "SOMA", "lat": 37.7785, "lng": -122.4056}, "e4": {"id": "e4", "name": "Beeple 新展", "url": "https://www.xiaohongshu.com/explore/69d34e11000000002202835d", "quote": "「Beeple新展在湾区Palo Alto开幕🌊」", "description": "数字艺术明星Beeple首个湾区个展，动态屏幕装置很有未来感。", "neighborhood": "Palo Alto", "time_window": null, "price": "$$", "themes": ["艺术"], "thumbnail": "images/69d34e11000000002202835d.webp", "snippet": "看展的饺子\n04-27", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/69d34e11000000002202835d?xsec_token=AB7SiZtGij9vlufHMQ18eIEfbS4gkgWcRxVybB3KNiHxU%3D&xsec_source=", "neighborhood_canonical": "Palo Alto", "lat": 37.4419, "lng": -122.143}, "e5": {"id": "e5", "name": "沉浸冥想展", "url": "https://www.xiaohongshu.com/explore/6a0eda0400000000350270a6", "quote": "「湾区必看展览！在这来一次沉浸式冥想」", "description": "放下手机走进去，让光影和声场带你做一次正念练习。", "neighborhood": null, "time_window": null, "price": "$$", "themes": ["艺术", "文化"], "thumbnail": "images/6a0eda0400000000350270a6.webp", "snippet": "加州旅游局\n4天前", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/6a0eda0400000000350270a6?xsec_token=ABI0UxbEew-nS0Mu9qifBC49HBpdXt_Ai01ARO4p6GO7c%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}, "e6": {"id": "e6", "name": "Decorator Showcase", "url": "https://www.xiaohongshu.com/explore/69f7c62e000000001b022c13", "quote": "「湾区 | SF Decorator Showcase 年度展又来了」", "description": "一年一度的豪宅室内设计展，建筑迷和家居控请勿错过。", "neighborhood": "Pacific Heights", "time_window": null, "price": "$$$", "themes": ["艺术", "文化"], "thumbnail": "images/69f7c62e000000001b022c13.webp", "snippet": "鸢尾好多\n05-13", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/69f7c62e000000001b022c13?xsec_token=AB0SK2wo-q4UVEULSDJ7ZZPMvs2HCU7TFSo5f1JPUyJA8%3D&xsec_source=", "neighborhood_canonical": "Pacific Heights", "lat": 37.7925, "lng": -122.4382}, "e7": {"id": "e7", "name": "侨批文化展", "url": "https://www.xiaohongshu.com/explore/6a07fe88000000003603104e", "quote": "「看完《给阿媛的情书》，我去现场看侨批展了」", "description": "展出早期华侨家书与汇款单，看完更懂这座城市的根。", "neighborhood": "Chinatown", "time_window": null, "price": "免费", "themes": ["文化", "艺术"], "thumbnail": "images/6a07fe88000000003603104e.webp", "snippet": "Mikey米莉\n2天前", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/6a07fe88000000003603104e?xsec_token=ABFvOtxUh1B33JEtK1FQDPnPkfYuCtr4T75QcqOiOfL-Y%3D&xsec_source=", "neighborhood_canonical": "Chinatown", "lat": 37.7941, "lng": -122.4078}, "e8": {"id": "e8", "name": "Djerassi 艺术徒步", "url": "https://www.xiaohongshu.com/explore/6a123f2a0000000013020400", "quote": "「湾区桃花源记——Djerassi艺术徒步」", "description": "在Woodside山林间穿行，沿途散布大型艺术装置，需提前预约。", "neighborhood": "Woodside", "time_window": "周末", "price": "免费", "themes": ["户外", "艺术", "宝藏地点"], "thumbnail": "images/6a123f2a0000000013020400.webp", "snippet": "是雷拉啊\n03-09", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/6a123f2a0000000013020400?xsec_token=ABb1iIfk-UwvejAhg7t7BC177oj-_QZkE0JuIIvEYuc3U%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}, "e9": {"id": "e9", "name": "Rodeo Beach", "url": "https://www.xiaohongshu.com/explore/6948bd44000000001e031458", "quote": "「湾区抑郁者的治愈之所｜Rodeo Beach」", "description": "金门大桥北岸的彩石海滩，雾天来更有电影感。", "neighborhood": "Marin Headlands", "time_window": null, "price": "免费", "themes": ["户外", "宝藏地点"], "thumbnail": "images/6948bd44000000001e031458.webp", "snippet": "泡泡蛋 04-04 147", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/6948bd44000000001e031458?xsec_token=ABqbTzZ0-kwOEj1dC05JJMpmKBwTKtmJgbj5-a_5Cf0Os%3D&xsec_source=", "neighborhood_canonical": "Marin", "lat": 37.9735, "lng": -122.5311}, "e10": {"id": "e10", "name": "Brentwood 采摘", "url": "https://www.xiaohongshu.com/explore/69fb603e0000000038020624", "quote": "「🍓湾区Brentwood桑葚+樱桃采摘攻略」", "description": "五月正是桑葚和樱桃同台的好时节，开车一小时就能到。", "neighborhood": "Brentwood", "time_window": "五月", "price": "$", "themes": ["户外", "美食"], "thumbnail": "images/69fb603e0000000038020624.webp", "snippet": "TINGTING\n2天前", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/69fb603e0000000038020624?xsec_token=ABjYW0AQJXhDy-C2gOa27MjnvKGgVFCCIAoQ3ducKgOtw%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}, "e11": {"id": "e11", "name": "老钱小镇渡轮游", "url": "https://www.xiaohongshu.com/explore/69d200cb000000002200c322", "quote": "「湾区坐渡轮去美国最富老钱小镇一日游｜」", "description": "从Ferry Building坐船去Belvedere/Tiburon，看看真正的老钱日常。", "neighborhood": "Tiburon", "time_window": null, "price": "$", "themes": ["户外", "宝藏地点"], "thumbnail": "images/69d200cb000000002200c322.webp", "snippet": "野生子涵\n05-16", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/69d200cb000000002200c322?xsec_token=ABtUTrQmdQW4Y3EYLUGUV8lNyDV0kFBtci9j9CWpJRJQw%3D&xsec_source=", "neighborhood_canonical": "Tiburon", "lat": 37.8735, "lng": -122.4569}, "e12": {"id": "e12", "name": "Dawn Ranch", "url": "https://www.xiaohongshu.com/explore/699bd97b000000000903b8d7", "quote": "「🌲湾区周末逃离计划📍Dawn Ranch」", "description": "Russian River边的森林小屋，适合两天一夜彻底放空。", "neighborhood": "Guerneville", "time_window": "周末", "price": "$$$", "themes": ["户外", "宝藏地点"], "thumbnail": "images/699bd97b000000000903b8d7.webp", "snippet": "Lumo365days\n02-23", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/699bd97b000000000903b8d7?xsec_token=ABz5c1AyW4oKFJwXw7xAp3XUU4n2kmdhfWlT3foXRiz_A%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}, "e13": {"id": "e13", "name": "Hayes Valley 逛街", "url": "https://www.xiaohongshu.com/explore/69fb58dd0000000022029fe3", "quote": "「三番🩷时髦街区第二弹Hayes Valley也好逛！」", "description": "小众设计师店、咖啡馆和冰淇淋一条龙，半天刚好。", "neighborhood": "Hayes Valley", "time_window": null, "price": "$$", "themes": ["美食", "文化"], "thumbnail": "images/69fb58dd0000000022029fe3.webp", "snippet": "三番🩷时髦街区第二弹Hayes Valley也好逛！", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/69fb58dd0000000022029fe3?xsec_token=ABjYW0AQJXhDy-C2gOa27Mjq_TTw-cVDMedvTFEp8AFH4%3D&xsec_source=", "neighborhood_canonical": "Hayes Valley", "lat": 37.7759, "lng": -122.4243}, "e14": {"id": "e14", "name": "Mission 漫游", "url": "https://www.xiaohongshu.com/explore/69fffc3d000000003701e11f", "quote": "「三番简单周末 | Mission不止有Valencia」", "description": "绕开Valencia主街，钻进18th和Florida的小店和壁画里。", "neighborhood": "Mission", "time_window": null, "price": "$$", "themes": ["文化", "美食"], "thumbnail": "images/69fffc3d000000003701e11f.webp", "snippet": "怕冷小熊猫\n2025-10-10", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/69fffc3d000000003701e11f?xsec_token=ABSdaVO75eXX30ats_mSr54XTtGGUqRP6D5zezhzNi25w%3D&xsec_source=", "neighborhood_canonical": "Mission", "lat": 37.7599, "lng": -122.4148}, "e15": {"id": "e15", "name": "Lands End 路线", "url": "https://www.xiaohongshu.com/explore/69d28c12000000001a02f505", "quote": "「旧金山 Lands End 完美逛娃地图（半日游）」", "description": "Legion of Honor配上海岸步道和Waymo体验，半日游天花板。", "neighborhood": "Outer Richmond", "time_window": null, "price": "免费", "themes": ["户外", "艺术"], "thumbnail": "images/69d28c12000000001a02f505.webp", "snippet": "旧金山 Lands End 完美逛娃地图（半日游）\nLegion of Honor · Mile Rock Beach · USS SF · WAYMO", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/69d28c12000000001a02f505?xsec_token=ABtUTrQmdQW4Y3EYLUGUV8lAQD0sXXKWkU1nzIOuPHln0%3D&xsec_source=", "neighborhood_canonical": "Richmond", "lat": 37.7806, "lng": -122.4644}, "e16": {"id": "e16", "name": "The Interval", "url": "https://www.xiaohongshu.com/explore/69757999000000000a03e870", "quote": "「旧金山必访｜The Interval at Long Now」", "description": "Fort Mason里的酒吧兼图书馆，谈话比酒更醉人。", "neighborhood": "Fort Mason", "time_window": null, "price": "$$", "themes": ["宝藏地点", "文化"], "thumbnail": "images/69757999000000000a03e870.webp", "snippet": "1001家书店\n01-25", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/69757999000000000a03e870?xsec_token=AB0VfQoVH93hzZSKrVyoX2uO1KACpyHyi8py-CIcVwCgE%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}, "e17": {"id": "e17", "name": "Soralla 西班牙菜", "url": "https://www.xiaohongshu.com/explore/69ae468f000000001a024e67", "quote": "「🍅Soralla｜可以用惊为天人来形容这种美味！」", "description": "番茄面包和伊比利亚火腿做到位，是近期口碑最好的Tapas之一。", "neighborhood": null, "time_window": null, "price": "$$$", "themes": ["美食"], "thumbnail": "images/69ae468f000000001a024e67.webp", "snippet": "77🖤🖤\n03-09", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/69ae468f000000001a024e67?xsec_token=AB7rGmRXRZQ2vGZuuJLGTHC31VokqKUSV-sk8fneB4XGk%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}, "e18": {"id": "e18", "name": "懒熊新Bistro", "url": "https://www.xiaohongshu.com/explore/6959ecd30000000022030ad7", "quote": "「懒熊旗下新法式Bistro好好吃！」", "description": "湾区人气餐厅集团的最新法式小馆，气氛和分量都很到位。", "neighborhood": null, "time_window": null, "price": "$$$", "themes": ["美食"], "thumbnail": "images/6959ecd30000000022030ad7.webp", "snippet": "Cala在吃饭的路上\n05-07\n25", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/6959ecd30000000022030ad7?xsec_token=ABOOsKSoMECIB6MEREhzNkS-qQgNLRMFGfxxoYW6lmPpw%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}, "e19": {"id": "e19", "name": "清酒小铺", "url": "https://www.xiaohongshu.com/explore/6843a294000000002001eba1", "quote": "「旧金山又一家清酒小铺」", "description": "店主精选的小批量清酒，可以坐下品几杯再带瓶回家。", "neighborhood": null, "time_window": null, "price": "$$", "themes": ["美食", "宝藏地点"], "thumbnail": "images/6843a294000000002001eba1.webp", "snippet": "Cala在吃饭的路上\n2025-06-07", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/6843a294000000002001eba1?xsec_token=ABbQEzF6SjQlNArkEsWUoGktjaJcnPyZvdXzOWtKWiAl8%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}, "e20": {"id": "e20", "name": "新晋排队点", "url": "https://www.xiaohongshu.com/explore/6a1381620000000035039d0e", "quote": "「湾区新晋排队活动🔑」", "description": "本周最新的网红打卡点，趁热度还没散赶紧去。", "neighborhood": null, "time_window": null, "price": "$$", "themes": ["活动", "美食"], "thumbnail": "images/6a1381620000000035039d0e.webp", "snippet": "陈艾荷\n1天前", "full_text": "", "hashtags": [], "xsec_url": "https://www.xiaohongshu.com/explore/6a1381620000000035039d0e?xsec_token=ABjfJF9CJdGIdkinI9twZUqjZnC28NAgxsilXlSHV1KzE%3D&xsec_source=", "neighborhood_canonical": "San Francisco", "lat": 37.7749, "lng": -122.4194}};
+
+    function openSheet(id) {
+      const e = ENTITIES[id];
+      if (!e) return;
+      document.getElementById('sheet-quote').textContent = e.quote || '';
+      document.getElementById('sheet-desc').textContent  = e.description || '';
+
+      const textBody = e.full_text || e.snippet || '';
+      const textEl = document.getElementById('sheet-text');
+      textEl.textContent = textBody;
+      textEl.style.display = textBody ? '' : 'none';
+
+      const chips = [];
+      if (e.neighborhood) chips.push(['街区', e.neighborhood]);
+      if (e.time_window)  chips.push(['时间', e.time_window]);
+      if (e.price)        chips.push(['价位', e.price]);
+      document.getElementById('sheet-chips').innerHTML =
+        chips.map(([k,v]) =>
+          `<span class="bg-gray-100 text-gray-700 text-xs rounded-full px-2.5 py-0.5">${k} · ${v}</span>`
+        ).join('');
+
+      document.getElementById('sheet-tags').innerHTML =
+        (e.hashtags||[]).map(t =>
+          `<span class="bg-orange-50 rounded-full px-2 py-0.5">${t}</span>`
+        ).join('');
+
+      const img = document.getElementById('sheet-img');
+      if (e.thumbnail) { img.src = e.thumbnail; img.style.display = ''; }
+      else { img.style.display = 'none'; }
+
+      document.getElementById('sheet-link').href = e.xsec_url || e.url || '#';
+      const overlay = document.getElementById('sheet-overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSheet(ev) {
+      if (ev && ev.target.closest('#sheet-box')) return;
+      const overlay = document.getElementById('sheet-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    // Tab switching (Map is disabled in Phase 1; same handler will work for Phase 3)
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (tab.classList.contains('disabled')) return;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const which = tab.dataset.tab;
+        document.getElementById('pane-read').classList.toggle('hidden', which !== 'read');
+        document.getElementById('pane-map').classList.toggle('hidden', which !== 'map');
+      });
+    });
+  </script>
+</body>
+</html>
