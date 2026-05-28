@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>🌉 湾区每日探索 · 2026年5月28日</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;}
+    #sheet-box{max-height:85vh;overflow-y:auto;}
+    .entity-ref{
+      color:#ea580c; font-weight:600; cursor:pointer;
+      text-decoration:underline; text-decoration-color:#fed7aa;
+      text-decoration-thickness:2px; text-underline-offset:3px;
+      transition:text-decoration-color .15s;
+    }
+    .entity-ref:hover{text-decoration-color:#ea580c;}
+    .token{
+      display:inline-flex; align-items:center;
+      background:#fff7ed; border:1px solid #fed7aa; color:#c2410c;
+      font-size:0.75rem; font-weight:500;
+      padding:0.05rem 0.5rem; border-radius:9999px;
+      cursor:pointer; transition:all .15s;
+      margin:0 1px; vertical-align:0.05em; white-space:nowrap;
+    }
+    .token:hover{background:#ffedd5; border-color:#fdba74;}
+    .tab{
+      padding:0.5rem 1rem; font-size:0.875rem; font-weight:500;
+      border-bottom:2px solid transparent; color:#6b7280; cursor:pointer;
+      transition:color .15s, border-color .15s;
+    }
+    .tab:hover:not(.disabled){color:#374151;}
+    .tab.active{color:#ea580c; border-bottom-color:#ea580c;}
+    .tab.disabled{color:#d1d5db; cursor:not-allowed;}
+    .section-heading{
+      font-size:1.25rem; font-weight:700; color:#111827;
+      margin-bottom:0.75rem; letter-spacing:-0.01em;
+    }
+    .section-body p{margin-bottom:0.75rem;}
+    .section-body p:last-child{margin-bottom:0;}
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <header class="bg-white border-b shadow-sm sticky top-0 z-10">
+    <div class="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div>
+        <span class="text-lg font-bold text-gray-900">🌉 湾区每日探索</span>
+        <span class="ml-2 text-sm text-gray-400">2026年5月28日</span>
+      </div>
+      <a href="index.html"
+         class="text-xs text-gray-400 hover:text-gray-700 border border-gray-200
+                rounded-full px-3 py-1 hover:border-gray-400 transition-colors">往期 →</a>
+    </div>
+    <div class="max-w-2xl mx-auto px-4 flex gap-1 border-t border-gray-100">
+      <div class="tab active" data-tab="read">阅读</div>
+      <div class="tab disabled" data-tab="map" title="即将上线">地图</div>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-6">
+    <div id="pane-read" class="space-y-8 leading-relaxed text-gray-800 text-[15px]">
+      <p class="text-gray-400">本期内容暂未生成。</p>
+    </div>
+    <div id="pane-map" class="hidden text-center text-gray-400 py-16">
+      <div class="text-4xl mb-2">🗺️</div>
+      <div class="text-sm">地图视图即将上线</div>
+    </div>
+  </main>
+
+  <footer class="max-w-2xl mx-auto px-4 py-8 text-center text-xs text-gray-400 border-t mt-4">
+    内容来源于小红书公开帖子 · 出行前请点击原帖确认最新信息
+    <div class="mt-1">搜索词：湾区活动 · 旧金山周末 · 湾区好去处 · 旧金山好玩 · 湾区展览 · 湾区美食 · 旧金山景点</div>
+  </footer>
+
+  <!-- Bottom sheet -->
+  <div id="sheet-overlay"
+       class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-end justify-center"
+       onclick="closeSheet(event)">
+    <div id="sheet-box"
+         class="bg-white w-full max-w-2xl rounded-t-2xl p-5 pb-8 relative">
+      <button onclick="closeSheet()"
+              class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
+      <img id="sheet-img" src="" alt=""
+           class="w-full rounded-xl mb-4 object-cover max-h-64"
+           onerror="this.style.display='none'" style="display:none"/>
+      <p id="sheet-quote"  class="font-bold text-gray-900 text-base mb-1"></p>
+      <p id="sheet-desc"   class="text-orange-600 text-sm mb-3 leading-relaxed"></p>
+      <div id="sheet-chips" class="flex flex-wrap gap-1.5 mb-3"></div>
+      <p id="sheet-text"   class="text-gray-700 text-sm leading-relaxed whitespace-pre-line border-t pt-3 mb-3"></p>
+      <div id="sheet-tags" class="flex flex-wrap gap-1 mb-4 text-xs text-orange-500"></div>
+      <a id="sheet-link" href="#"
+         onclick="window.open(this.href,'_blank','noopener'); return false;"
+         class="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white
+                font-semibold rounded-xl py-3 transition-colors text-sm">
+        在小红书网页版查看完整帖子 →
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const ENTITIES = {};
+
+    function openSheet(id) {
+      const e = ENTITIES[id];
+      if (!e) return;
+      document.getElementById('sheet-quote').textContent = e.quote || '';
+      document.getElementById('sheet-desc').textContent  = e.description || '';
+
+      const textBody = e.full_text || e.snippet || '';
+      const textEl = document.getElementById('sheet-text');
+      textEl.textContent = textBody;
+      textEl.style.display = textBody ? '' : 'none';
+
+      const chips = [];
+      if (e.neighborhood) chips.push(['街区', e.neighborhood]);
+      if (e.time_window)  chips.push(['时间', e.time_window]);
+      if (e.price)        chips.push(['价位', e.price]);
+      document.getElementById('sheet-chips').innerHTML =
+        chips.map(([k,v]) =>
+          `<span class="bg-gray-100 text-gray-700 text-xs rounded-full px-2.5 py-0.5">${k} · ${v}</span>`
+        ).join('');
+
+      document.getElementById('sheet-tags').innerHTML =
+        (e.hashtags||[]).map(t =>
+          `<span class="bg-orange-50 rounded-full px-2 py-0.5">${t}</span>`
+        ).join('');
+
+      const img = document.getElementById('sheet-img');
+      if (e.thumbnail) { img.src = e.thumbnail; img.style.display = ''; }
+      else { img.style.display = 'none'; }
+
+      document.getElementById('sheet-link').href = e.xsec_url || e.url || '#';
+      const overlay = document.getElementById('sheet-overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSheet(ev) {
+      if (ev && ev.target.closest('#sheet-box')) return;
+      const overlay = document.getElementById('sheet-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    // Tab switching (Map is disabled in Phase 1; same handler will work for Phase 3)
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (tab.classList.contains('disabled')) return;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const which = tab.dataset.tab;
+        document.getElementById('pane-read').classList.toggle('hidden', which !== 'read');
+        document.getElementById('pane-map').classList.toggle('hidden', which !== 'map');
+      });
+    });
+  </script>
+</body>
+</html>
