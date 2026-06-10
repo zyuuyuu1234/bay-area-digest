@@ -455,8 +455,9 @@
       </div>`;
     }
 
-    // Live progress card shown while the backend crawls. Fed by the NDJSON
-    // stream so the stages (searching → reading i/n → summarizing) are real.
+    // Progress card while the backend crawls/summarizes. Public pages use the
+    // plain JSON endpoint for stability; the streaming helper below is kept for
+    // local/debug flows where live per-note progress is useful.
     function _rsProgress(p) {
       let label = '正在汇总…', sub = '', pct = 0, indeterminate = true;
       if (p.stage === 'searching') {
@@ -601,17 +602,19 @@
       }
 
       // A backend is configured (e.g. your laptop behind an HTTPS tunnel) — do a
-      // real live lookup for anything not already cached.
+      // real live lookup for anything not already cached. Use the plain JSON
+      // endpoint first: minimized/background browser tabs are much more likely
+      // to interrupt long-lived streamed fetches.
       box.innerHTML = _rsProgress({stage: 'searching'});
       try {
-        await _rsFetchStream(name, box);
+        const data = await _rsFetchJson(name);
+        box.innerHTML = _rsRender(data);
       } catch (e) {
-        // Some browsers are flaky with cross-origin streamed fetches over the
-        // ngrok HTTP/2 tunnel. Fall back to the plain JSON endpoint.
+        // If the simple request fails because of a transient browser/network
+        // hiccup, try the streaming endpoint once before surfacing the error.
         try {
           box.innerHTML = _rsProgress({stage: 'summarizing'});
-          const data = await _rsFetchJson(name);
-          box.innerHTML = _rsRender(data);
+          await _rsFetchStream(name, box);
         } catch (fallbackError) {
           box.innerHTML = _rsError(String(fallbackError).replace(/^Error:\s*/, ''));
         }
