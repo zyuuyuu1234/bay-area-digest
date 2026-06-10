@@ -336,7 +336,7 @@
     function _rsGallery(g) {
       if (!g || !g.length) return '';
       const imgs = g.map(it =>
-        `<a href="${_rsEsc(it.post_url)}" target="_blank" rel="noopener" class="shrink-0"
+        `<a href="${_rsEsc(it.link || it.post_url || '#')}" target="_blank" rel="noopener" class="shrink-0"
            title="${_rsEsc(it.title)}">${_rsImg(it.url,
            'h-28 w-28 object-cover rounded-lg bg-gray-100 hover:opacity-90 transition', it.title)}</a>`
       ).join('');
@@ -419,7 +419,7 @@
     }
 
     function _rsSource(s) {
-      return `<a href="${_rsEsc(s.url)}" target="_blank" rel="noopener"
+      return `<a href="${_rsEsc(s.link || s.url || '#')}" target="_blank" rel="noopener"
         class="block text-xs text-gray-500 hover:text-orange-600 truncate py-1">
         ❤ ${s.liked_count || 0} · ${_rsEsc(s.title || '原帖')}</a>`;
     }
