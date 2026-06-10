@@ -510,6 +510,73 @@
       return headers;
     }
 
+    async function _rsFetchJson(name) {
+      let res = await fetch(`${RESTAURANT_API}/api/restaurant?name=${encodeURIComponent(name)}`, {
+        headers: _rsHeaders(),
+      });
+      if (res.status === 401) {
+        localStorage.removeItem(_rsKeyStorage);
+        const key = _rsFriendKey(true);
+        if (key) {
+          res = await fetch(`${RESTAURANT_API}/api/restaurant?name=${encodeURIComponent(name)}`, {
+            headers: _rsHeaders(),
+          });
+        }
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.detail || data.error || (res.status === 401 ? '访问口令不正确' : '后端无响应'));
+      }
+      return data;
+    }
+
+    async function _rsFetchStream(name, box) {
+      let res = await fetch(`${RESTAURANT_API}/api/restaurant/stream?name=${encodeURIComponent(name)}`, {
+        headers: _rsHeaders(),
+      });
+      if (res.status === 401) {
+        localStorage.removeItem(_rsKeyStorage);
+        const key = _rsFriendKey(true);
+        if (key) {
+          res = await fetch(`${RESTAURANT_API}/api/restaurant/stream?name=${encodeURIComponent(name)}`, {
+            headers: _rsHeaders(),
+          });
+        }
+      }
+      if (!res.ok || !res.body) {
+        let detail = res.status === 401 ? '访问口令不正确' : '后端无响应';
+        try {
+          const err = await res.json();
+          detail = err.detail || err.error || detail;
+        } catch (_) {}
+        throw new Error(detail);
+      }
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf = '', finished = false;
+      while (true) {
+        const {value, done} = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, {stream: true});
+        let nl;
+        while ((nl = buf.indexOf('\n')) >= 0) {
+          const line = buf.slice(0, nl).trim();
+          buf = buf.slice(nl + 1);
+          if (!line) continue;
+          let evt;
+          try { evt = JSON.parse(line); } catch (_) { continue; }
+          if (evt.stage === 'done') {
+            box.innerHTML = _rsRender(evt.payload); finished = true;
+          } else if (evt.stage === 'error') {
+            box.innerHTML = _rsError(evt.detail, evt.hint); finished = true;
+          } else {
+            box.innerHTML = _rsProgress(evt);
+          }
+        }
+      }
+      if (!finished) throw new Error('查询中断，请重试');
+    }
+
     async function searchRestaurant(ev) {
       ev.preventDefault();
       const name = document.getElementById('rs-input').value.trim();
@@ -537,55 +604,17 @@
       // real live lookup for anything not already cached.
       box.innerHTML = _rsProgress({stage: 'searching'});
       try {
-        let res = await fetch(`${RESTAURANT_API}/api/restaurant/stream?name=${encodeURIComponent(name)}`, {
-          headers: _rsHeaders(),
-        });
-        if (res.status === 401) {
-          localStorage.removeItem(_rsKeyStorage);
-          const key = _rsFriendKey(true);
-          if (key) {
-            res = await fetch(`${RESTAURANT_API}/api/restaurant/stream?name=${encodeURIComponent(name)}`, {
-              headers: _rsHeaders(),
-            });
-          }
-        }
-        if (!res.ok || !res.body) {
-          let detail = res.status === 401 ? '访问口令不正确' : '后端无响应';
-          try {
-            const err = await res.json();
-            detail = err.detail || err.error || detail;
-          } catch (_) {}
-          box.innerHTML = _rsError(detail);
-          return false;
-        }
-        const reader = res.body.getReader();
-        const dec = new TextDecoder();
-        let buf = '', finished = false;
-        while (true) {
-          const {value, done} = await reader.read();
-          if (done) break;
-          buf += dec.decode(value, {stream: true});
-          let nl;
-          while ((nl = buf.indexOf('\n')) >= 0) {
-            const line = buf.slice(0, nl).trim();
-            buf = buf.slice(nl + 1);
-            if (!line) continue;
-            let evt;
-            try { evt = JSON.parse(line); } catch (_) { continue; }
-            if (evt.stage === 'done') {
-              box.innerHTML = _rsRender(evt.payload); finished = true;
-            } else if (evt.stage === 'error') {
-              box.innerHTML = _rsError(evt.detail, evt.hint); finished = true;
-            } else {
-              box.innerHTML = _rsProgress(evt);
-            }
-          }
-        }
-        if (!finished) box.innerHTML = _rsError('查询中断，请重试');
+        await _rsFetchStream(name, box);
       } catch (e) {
-        box.innerHTML = `<div class="text-center text-red-400 text-sm py-10">
-          无法连接后端：${_rsEsc(String(e))}<br/>
-          <span class="text-xs text-gray-400">运行 <code>python -m server.app</code> 后重试</span></div>`;
+        // Some browsers are flaky with cross-origin streamed fetches over the
+        // ngrok HTTP/2 tunnel. Fall back to the plain JSON endpoint.
+        try {
+          box.innerHTML = _rsProgress({stage: 'summarizing'});
+          const data = await _rsFetchJson(name);
+          box.innerHTML = _rsRender(data);
+        } catch (fallbackError) {
+          box.innerHTML = _rsError(String(fallbackError).replace(/^Error:\s*/, ''));
+        }
       }
       return false;
     }
