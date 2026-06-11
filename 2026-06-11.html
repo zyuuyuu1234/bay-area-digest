@@ -518,89 +518,77 @@
       return {signal: ctrl.signal, done: () => clearTimeout(timer)};
     }
 
-    async function _rsFetchJson(name) {
-      const request = async () => {
-        const t = _rsTimeoutSignal(150000);
-        try {
-          return await fetch(`${RESTAURANT_API}/api/restaurant?name=${encodeURIComponent(name)}`, {
-            headers: _rsHeaders(),
-            signal: t.signal,
-          });
-        } catch (e) {
-          if (e && e.name === 'AbortError') throw new Error('查询超时，请重试');
-          throw e;
-        } finally {
-          t.done();
-        }
-      };
-      let res = await request();
-      if (res.status === 401) {
-        localStorage.removeItem(_rsKeyStorage);
-        const key = _rsFriendKey(true);
-        if (key) res = await request();
-      }
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.detail || data.error || (res.status === 401 ? '访问口令不正确' : '后端无响应'));
-      }
-      return data;
-    }
-
-    async function _rsFetchStream(name, box) {
-      const t = _rsTimeoutSignal(150000);
+    async function _rsShortFetch(url, options={}) {
+      const t = _rsTimeoutSignal(20000);
       try {
-        let res = await fetch(`${RESTAURANT_API}/api/restaurant/stream?name=${encodeURIComponent(name)}`, {
-          headers: _rsHeaders(),
-          signal: t.signal,
-        });
-        if (res.status === 401) {
-          localStorage.removeItem(_rsKeyStorage);
-          const key = _rsFriendKey(true);
-          if (key) {
-            res = await fetch(`${RESTAURANT_API}/api/restaurant/stream?name=${encodeURIComponent(name)}`, {
-              headers: _rsHeaders(),
-              signal: t.signal,
-            });
-          }
-        }
-        if (!res.ok || !res.body) {
-          let detail = res.status === 401 ? '访问口令不正确' : '后端无响应';
-          try {
-            const err = await res.json();
-            detail = err.detail || err.error || detail;
-          } catch (_) {}
-          throw new Error(detail);
-        }
-        const reader = res.body.getReader();
-        const dec = new TextDecoder();
-        let buf = '', finished = false;
-        while (true) {
-          const {value, done} = await reader.read();
-          if (done) break;
-          buf += dec.decode(value, {stream: true});
-          let nl;
-          while ((nl = buf.indexOf('\n')) >= 0) {
-            const line = buf.slice(0, nl).trim();
-            buf = buf.slice(nl + 1);
-            if (!line) continue;
-            let evt;
-            try { evt = JSON.parse(line); } catch (_) { continue; }
-            if (evt.stage === 'done') {
-              box.innerHTML = _rsRender(evt.payload); finished = true;
-            } else if (evt.stage === 'error') {
-              box.innerHTML = _rsError(evt.detail, evt.hint); finished = true;
-            } else {
-              box.innerHTML = _rsProgress(evt);
-            }
-          }
-        }
-        if (!finished) throw new Error('查询中断，请重试');
+        return await fetch(url, {...options, signal: t.signal});
       } catch (e) {
-        if (e && e.name === 'AbortError') throw new Error('查询超时，请重试');
+        if (e && e.name === 'AbortError') throw new Error('后端响应超时，请重试');
         throw e;
       } finally {
         t.done();
       }
+    }
+
+    async function _rsAuthedJson(makeRequest) {
+      let res = await makeRequest();
+      if (res.status === 401) {
+        localStorage.removeItem(_rsKeyStorage);
+        const key = _rsFriendKey(true);
+        if (key) res = await makeRequest();
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const err = new Error(data.detail || data.error || (res.status === 401 ? '访问口令不正确' : '后端无响应'));
+        err.hint = data.hint;
+        throw err;
+      }
+      return data;
+    }
+
+    async function _rsStartJob(name) {
+      return await _rsAuthedJson(() => _rsShortFetch(`${RESTAURANT_API}/api/restaurant/jobs`, {
+        method: 'POST',
+        headers: {..._rsHeaders(), 'Content-Type': 'application/json'},
+        body: JSON.stringify({name}),
+      }));
+    }
+
+    async function _rsGetJob(id) {
+      return await _rsAuthedJson(() => _rsShortFetch(`${RESTAURANT_API}/api/restaurant/jobs/${encodeURIComponent(id)}`, {
+        headers: _rsHeaders(),
+      }));
+    }
+
+    function _rsSleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function _rsJobProgress(job) {
+      const p = job.progress || {};
+      return {
+        stage: job.stage || job.status || 'working',
+        done: p.done || 0,
+        total: p.total || 0,
+      };
+    }
+
+    async function _rsPollJob(job, box) {
+      const deadline = Date.now() + 180000;
+      while (job && job.status !== 'done') {
+        if (job.status === 'error' || job.status === 'timeout') {
+          const err = new Error(job.detail || job.error || '查询失败，请重试');
+          err.hint = job.hint;
+          throw err;
+        }
+        if (!job.id) throw new Error('查询任务不存在，请重试');
+        if (Date.now() > deadline) throw new Error('查询还在后台运行，请稍后重试');
+        box.innerHTML = _rsProgress(_rsJobProgress(job));
+        await _rsSleep(1500);
+        job = await _rsGetJob(job.id);
+      }
+      if (!job || !job.result) throw new Error('查询没有返回结果，请重试');
+      return job.result;
     }
 
     async function searchRestaurant(ev) {
@@ -626,16 +614,16 @@
         return false;
       }
 
-      // A backend is configured (e.g. your laptop behind an HTTPS tunnel) — do a
-      // real live lookup for anything not already cached. Use the plain JSON
-      // endpoint first: minimized/background browser tabs are much more likely
-      // to interrupt long-lived streamed fetches.
+      // A backend is configured (e.g. your laptop behind an HTTPS tunnel).
+      // Start a short-lived job request, then poll status while the Mac mini
+      // keeps the RedNote browser crawl running in the background.
       box.innerHTML = _rsProgress({stage: 'searching'});
       try {
-        const data = await _rsFetchJson(name);
+        const job = await _rsStartJob(name);
+        const data = await _rsPollJob(job, box);
         box.innerHTML = _rsRender(data);
       } catch (e) {
-        box.innerHTML = _rsError(String(e).replace(/^Error:\s*/, ''));
+        box.innerHTML = _rsError(String(e).replace(/^Error:\s*/, ''), e.hint);
       }
       return false;
     }
