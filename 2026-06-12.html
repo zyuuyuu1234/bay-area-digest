@@ -64,7 +64,24 @@
     <div class="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
       <div>
         <span class="text-lg font-bold text-gray-900">🌉 湾区每日探索</span>
-        <span class="ml-2 text-sm text-gray-400">2026年6月12日</span>
+        <select id="date-select"
+                class="ml-2 text-xs text-gray-500 border border-gray-200 rounded-full px-2.5 py-1 bg-white
+                       focus:outline-none focus:border-orange-300">
+          <option value="index.html" selected>2026-06-12</option>
+          <option value="2026-06-11.html">2026-06-11</option>
+          <option value="2026-06-10.html">2026-06-10</option>
+          <option value="2026-06-06.html">2026-06-06</option>
+          <option value="2026-06-02.html">2026-06-02</option>
+          <option value="2026-06-01.html">2026-06-01</option>
+          <option value="2026-05-30.html">2026-05-30</option>
+          <option value="2026-05-28.html">2026-05-28</option>
+          <option value="2026-05-27.html">2026-05-27</option>
+          <option value="2026-05-26.html">2026-05-26</option>
+          <option value="2026-05-25.html">2026-05-25</option>
+          <option value="2026-05-22.html">2026-05-22</option>
+          <option value="2026-05-21.html">2026-05-21</option>
+          <option value="2026-05-20.html">2026-05-20</option>
+        </select>
       </div>
       <nav class="flex items-center gap-2 text-xs">
         <a href="index.html"
@@ -352,6 +369,11 @@
 
     document.querySelectorAll('.app-tab').forEach(tab => {
       tab.addEventListener('click', () => showApp(tab.dataset.appTab));
+    });
+
+    document.getElementById('date-select')?.addEventListener('change', ev => {
+      const href = ev.target.value;
+      if (href) window.location.href = href;
     });
 
     if (new URLSearchParams(window.location.search).get('view') === 'search') {

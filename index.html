@@ -3,111 +3,835 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>🌉 湾区每日探索</title>
+  <title>🌉 湾区每日探索 · 2026年6月12日</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;}</style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;}
+    #sheet-box{max-height:85vh;overflow-y:auto;}
+    /* Contain Leaflet's internal z-index stack (panes/controls go up to 1000)
+       inside its own stacking context, so it can never paint over the bottom
+       sheet. position:relative + an explicit z-index creates the context. */
+    .leaflet-container{font-family:inherit; position:relative; z-index:0;}
+    .map-pin{
+      display:flex; align-items:center; justify-content:center;
+      width:34px; height:34px; font-size:20px; line-height:1;
+      background:#fff; border:2px solid #fed7aa; border-radius:9999px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.25); cursor:pointer;
+    }
+    .entity-ref{
+      color:#ea580c; font-weight:600; cursor:pointer;
+      text-decoration:underline; text-decoration-color:#fed7aa;
+      text-decoration-thickness:2px; text-underline-offset:3px;
+      transition:text-decoration-color .15s;
+    }
+    .entity-ref:hover{text-decoration-color:#ea580c;}
+    .token{
+      display:inline-flex; align-items:center;
+      background:#fff7ed; border:1px solid #fed7aa; color:#c2410c;
+      font-size:0.75rem; font-weight:500;
+      padding:0.05rem 0.5rem; border-radius:9999px;
+      cursor:pointer; transition:all .15s;
+      margin:0 1px; vertical-align:0.05em; white-space:nowrap;
+    }
+    .token:hover{background:#ffedd5; border-color:#fdba74;}
+    .tab{
+      padding:0.5rem 1rem; font-size:0.875rem; font-weight:500;
+      border-bottom:2px solid transparent; color:#6b7280; cursor:pointer;
+      transition:color .15s, border-color .15s;
+    }
+    .tab:hover:not(.disabled){color:#374151;}
+    .tab.active{color:#ea580c; border-bottom-color:#ea580c;}
+    .tab.disabled{color:#d1d5db; cursor:not-allowed;}
+    .app-tab{
+      border:1px solid #e5e7eb; border-radius:9999px;
+      padding:0.25rem 0.75rem; color:#9ca3af; transition:all .15s;
+    }
+    .app-tab:hover{color:#374151; border-color:#9ca3af;}
+    .app-tab.active{color:#ea580c; border-color:#fed7aa; background:#fff7ed;}
+    .section-heading{
+      font-size:1.25rem; font-weight:700; color:#111827;
+      margin-bottom:0.75rem; letter-spacing:-0.01em;
+    }
+    .section-body p{margin-bottom:0.75rem;}
+    .section-body p:last-child{margin-bottom:0;}
+  </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <header class="bg-white border-b shadow-sm">
-    <div class="max-w-2xl mx-auto px-4 py-5">
-      <h1 class="text-2xl font-bold text-gray-900">🌉 湾区每日探索</h1>
-      <p class="text-sm text-gray-500 mt-1">每天从小红书为你精选湾区好去处</p>
+
+  <header class="bg-white border-b shadow-sm sticky top-0 z-10">
+    <div class="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div>
+        <span class="text-lg font-bold text-gray-900">🌉 湾区每日探索</span>
+        <select id="date-select"
+                class="ml-2 text-xs text-gray-500 border border-gray-200 rounded-full px-2.5 py-1 bg-white
+                       focus:outline-none focus:border-orange-300">
+          <option value="index.html" selected>2026-06-12</option>
+          <option value="2026-06-11.html">2026-06-11</option>
+          <option value="2026-06-10.html">2026-06-10</option>
+          <option value="2026-06-06.html">2026-06-06</option>
+          <option value="2026-06-02.html">2026-06-02</option>
+          <option value="2026-06-01.html">2026-06-01</option>
+          <option value="2026-05-30.html">2026-05-30</option>
+          <option value="2026-05-28.html">2026-05-28</option>
+          <option value="2026-05-27.html">2026-05-27</option>
+          <option value="2026-05-26.html">2026-05-26</option>
+          <option value="2026-05-25.html">2026-05-25</option>
+          <option value="2026-05-22.html">2026-05-22</option>
+          <option value="2026-05-21.html">2026-05-21</option>
+          <option value="2026-05-20.html">2026-05-20</option>
+        </select>
+      </div>
+      <nav class="flex items-center gap-2 text-xs">
+        <a href="index.html"
+           class="text-gray-400 hover:text-gray-700 border border-gray-200
+                  rounded-full px-3 py-1 hover:border-gray-400 transition-colors">往期</a>
+        <button type="button" class="app-tab active" data-app-tab="snapshot">每日快照</button>
+        <button type="button" class="app-tab" data-app-tab="search">餐厅搜索</button>
+      </nav>
+    </div>
+    <div id="snapshot-tabs" class="max-w-2xl mx-auto px-4 flex gap-1 border-t border-gray-100">
+      <div class="tab active" data-tab="read">阅读</div>
+      <div class="tab" data-tab="map">地图</div>
     </div>
   </header>
-  <main class="max-w-2xl mx-auto px-4 py-6 space-y-5">
-    <a href="2026-06-12.html?view=search" class="block bg-white rounded-xl p-4 shadow-sm border border-orange-100 hover:border-orange-300 hover:shadow-md transition-all">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="font-semibold text-gray-900">餐厅搜索</div>
-          <div class="text-xs text-gray-400 mt-0.5">跨城市实时汇总小红书餐厅口碑</div>
+
+  <main class="max-w-2xl mx-auto px-4 py-6">
+    <div id="pane-read" class="space-y-8 leading-relaxed text-gray-800 text-[15px]">
+      <section>
+  <h2 class="section-heading">先看本周末的大事</h2>
+  <div class="section-body"><p>6 月的湾区进入了最忙也最舒服的状态——白天 70 度，晚上能看夜景。这周末重点是 <span class="entity-ref" onclick="openSheet('e1')">6/12-14周末指南</span> <span class="token" onclick="openSheet('e1')">6/12-6/14</span>，夜市、六月节、免费博物馆日一起开。带娃的朋友可以参考 <span class="entity-ref" onclick="openSheet('e10')">飞机秀遛娃日</span>，飞机秀加泡泡节这种组合一年也就一次。</p>
+<p>想体验美式 county fair 的，<span class="entity-ref" onclick="openSheet('e2')">San Mateo County Fair</span> <span class="token" onclick="openSheet('e2')">San Mateo · 6月中旬</span> 已经开张，顺便能看 <span class="entity-ref" onclick="openSheet('e11')">小猪赛跑</span>，迷你小猪冲刺的样子莫名治愈。半岛那边 <span class="entity-ref" onclick="openSheet('e9')">Family Fun Day</span> <span class="token" onclick="openSheet('e9')">Los Altos · 周末</span> 完全免费，适合不想开太远的家庭。</p></div>
+</section>
+<section>
+  <h2 class="section-heading">看展专场：从 SFMOMA 到 Cantor</h2>
+  <div class="section-body"><p>这阵子湾区的展览密度肉眼可见——SFMOMA 的 <span class="entity-ref" onclick="openSheet('e4')">盐田千春展</span> <span class="token" onclick="openSheet('e4')">SOMA · 展期中</span> 仍然是最值得排队的当代艺术，红线装置在大空间里铺开特别震撼。Golden Gate Park 那头则是双线作战，<span class="entity-ref" onclick="openSheet('e3')">莫奈画展</span> <span class="token" onclick="openSheet('e3')">Golden Gate Park · 展期中</span> 和一年一度的 <span class="entity-ref" onclick="openSheet('e5')">Bouquets to Art</span> 撞在同一座馆里，建议留出一整天。</p>
+<p>南下的话，<span class="entity-ref" onclick="openSheet('e6')">斯坦福艺术展</span> <span class="token" onclick="openSheet('e6')">Palo Alto · 周末</span> 免费、清静、适合亲子；<span class="entity-ref" onclick="openSheet('e7')">San Jose 美术馆</span> <span class="token" onclick="openSheet('e7')">San Jose</span> 则是常被忽略但策展很认真的当代美术馆。如果你对华人移民史感兴趣，<span class="entity-ref" onclick="openSheet('e8')">侨批展</span> 是一封封侨批讲故事，看完会安静很久。</p></div>
+</section>
+<section>
+  <h2 class="section-heading">出城呼吸：海岸、红木与一点点逃离感</h2>
+  <div class="section-body"><p>6 月雾季的 city 不适合躺平，往北开就对了。<span class="entity-ref" onclick="openSheet('e12')">Land's End</span> <span class="token" onclick="openSheet('e12')">Outer Richmond</span> 是最近的逃离选项，沿断崖走两小时就能换一种心情；过桥到 Marin 那头，<span class="entity-ref" onclick="openSheet('e13')">Rodeo Beach</span> <span class="token" onclick="openSheet('e13')">Marin Headlands</span> 的彩色卵石滩和<span class="entity-ref" onclick="openSheet('e14')">Point Reyes</span> <span class="token" onclick="openSheet('e14')">Marin County</span> 的灯塔小鹿都值得专门跑一趟。</p>
+<p>想直接在外面过夜，<span class="entity-ref" onclick="openSheet('e15')">Dawn Ranch</span> <span class="token" onclick="openSheet('e15')">Guerneville · 周末</span> 是 Russian River 边的红木 cabin，自带松弛感。再小一点的 day trip 推荐 <span class="entity-ref" onclick="openSheet('e27')">森林图书馆</span> <span class="token" onclick="openSheet('e27')">Santa Cruz Mountains</span>，红木林里藏着一座小图书馆和瀑布，几乎没什么人。</p></div>
+</section>
+<section>
+  <h2 class="section-heading">半岛与街区漫步</h2>
+  <div class="section-body"><p>不想远行也别窝在家——<span class="entity-ref" onclick="openSheet('e16')">老钱小镇半日游</span> <span class="token" onclick="openSheet('e16')">Woodside</span> 走的是半岛松弛路线，独立书店和咖啡馆里能耗一下午。再往上一点的 <span class="entity-ref" onclick="openSheet('e17')">Carolands 城堡</span> <span class="token" onclick="openSheet('e17')">Hillsborough · 需预约</span> 是预约制法式古堡，导览讲得很认真，是真正的 hidden gem。</p>
+<p>City 里则推荐两块经常被低估的街区：<span class="entity-ref" onclick="openSheet('e18')">Jackson Square</span> <span class="token" onclick="openSheet('e18')">Jackson Square</span> 的红砖巷子像欧洲老城；<span class="entity-ref" onclick="openSheet('e19')">Dogpatch</span> <span class="token" onclick="openSheet('e19')">Dogpatch</span> 一带绿植店、烘焙坊、咖啡馆密度极高。不开车的话也可以学 <span class="entity-ref" onclick="openSheet('e25')">Caltrain 漫游</span> <span class="token" onclick="openSheet('e25')">周末</span>，随机挑两站下车走走。</p></div>
+</section>
+<section>
+  <h2 class="section-heading">吃什么：新店、老店与一个酒吧</h2>
+  <div class="section-body"><p>吃饭这周可以认真排个表。意面控冲 <span class="entity-ref" onclick="openSheet('e22')">Soralla</span> <span class="token" onclick="openSheet('e22')">San Francisco</span>；想体验高性价比 fine dining 试试 <span class="entity-ref" onclick="openSheet('e21')">$98 tasting menu</span> <span class="token" onclick="openSheet('e21')">San Francisco</span>；最近全城最难抢的甜品是 <span class="entity-ref" onclick="openSheet('e23')">新晋排队店</span>，请早点出门。</p>
+<p>中餐方向，开一小时也要去的 <span class="entity-ref" onclick="openSheet('e24')">贵州烧椒鸡</span> 是本季的惊喜；想要日式氛围感餐厅则推荐 <span class="entity-ref" onclick="openSheet('e26')">日式温泉餐厅</span> <span class="token" onclick="openSheet('e26')">San Francisco</span>。最后给爱安静的人留一个收尾选项——<span class="entity-ref" onclick="openSheet('e20')">The Interval</span> <span class="token" onclick="openSheet('e20')">Fort Mason</span>，Fort Mason 海边的小酒吧兼图书馆，点一杯坐到关门刚刚好。</p></div>
+</section>
+    </div>
+    <div id="pane-map" class="hidden">
+      <div id="leaflet-map"
+           class="rounded-xl overflow-hidden border border-gray-200"
+           style="height:70vh;min-height:420px;"></div>
+      <p class="text-xs text-gray-400 text-center mt-3">另有 5 个推荐无固定地点，见「阅读」视图</p>
+    </div>
+    <div id="pane-search" class="hidden">
+      <form id="rs-form" class="bg-white border border-gray-100 shadow-sm rounded-xl p-3"
+            onsubmit="return searchRestaurant(event)">
+        <div class="grid grid-cols-[1fr_auto] gap-2">
+          <input id="rs-input" type="text" autocomplete="off"
+                 placeholder="输入餐厅名，如「Z & Y」「家全七福」…"
+                 class="min-w-0 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm
+                        focus:outline-none focus:border-orange-400"/>
+          <button type="submit"
+                  class="bg-orange-500 hover:bg-orange-600 text-white font-semibold
+                         rounded-lg px-4 py-2.5 text-sm transition-colors whitespace-nowrap">搜索</button>
         </div>
-        <span class="text-orange-500 text-sm font-medium">打开 →</span>
-      </div>
-    </a>
-    <div class="space-y-3"><a href="2026-06-12.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-06-12</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-06-11.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-06-11</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-06-10.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-06-10</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-06-06.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-06-06</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-06-02.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-06-02</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-06-01.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-06-01</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-05-30.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-05-30</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-05-28.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-05-28</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-05-27.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-05-27</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-05-26.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-05-26</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-05-25.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-05-25</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-05-22.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-05-22</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-05-21.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-05-21</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a>
-<a href="2026-05-20.html" class="block bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
-  <div class="flex items-center justify-between">
-    <span class="font-semibold text-gray-900">2026-05-20</span>
-    <span class="text-orange-500 text-sm font-medium">查看 →</span>
-  </div>
-</a></div>
+        <div class="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-gray-500">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400 whitespace-nowrap">城市/地区</span>
+            <select id="rs-location-select"
+                    class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs bg-gray-50
+                           focus:outline-none focus:border-orange-400">
+            <option value="湾区" selected>湾区</option>
+            <option value="纽约">纽约</option>
+            <option value="洛杉矶">洛杉矶</option>
+            <option value="伦敦">伦敦</option>
+            <option value="东京">东京</option>
+            <option value="巴黎">巴黎</option>
+            <option value="新加坡">新加坡</option>
+            <option value="香港">香港</option>
+            <option value="上海">上海</option>
+            <option value="北京">北京</option>
+            <option value="台北">台北</option>
+            <option value="首尔">首尔</option>
+            <option value="曼谷">曼谷</option>
+            <option value="悉尼">悉尼</option>
+            <option value="墨尔本">墨尔本</option>
+            <option value="多伦多">多伦多</option>
+            <option value="温哥华">温哥华</option>
+            <option value="芝加哥">芝加哥</option>
+            <option value="迪拜">迪拜</option>
+            <option value="__custom__">自定义…</option>
+            </select>
+          </div>
+          <input id="rs-location-custom" type="text" autocomplete="off"
+                 placeholder="输入城市或地区"
+                 class="hidden sm:max-w-[15rem] border border-gray-200 rounded-lg px-3 py-2 text-xs
+                        focus:outline-none focus:border-orange-400"/>
+        </div>
+      </form>
+      <p id="rs-subtext" class="text-xs text-gray-400 mt-2">
+        实时汇总小红书上的帖子与评论，生成口碑小结与招牌菜推荐（首次查询约需 1-2 分钟）。
+      </p>
+      <label class="mt-3 inline-flex items-center gap-2 text-xs text-gray-500 select-none">
+        <input id="rs-refresh" type="checkbox"
+               class="h-3.5 w-3.5 rounded border-gray-300 text-orange-500
+                      focus:ring-orange-400"/>
+        <span>重新抓取</span>
+      </label>
+      <div id="rs-result" class="mt-5"></div>
+    </div>
   </main>
+
+  <footer class="max-w-2xl mx-auto px-4 py-8 text-center text-xs text-gray-400 border-t mt-4">
+    内容来源于小红书公开帖子 · 出行前请点击原帖确认最新信息
+    <div class="mt-1">搜索词：湾区活动 · 旧金山周末 · 湾区好去处 · 旧金山好玩 · 湾区展览 · 湾区美食 · 旧金山景点</div>
+  </footer>
+
+  <!-- Bottom sheet -->
+  <div id="sheet-overlay"
+       class="fixed inset-0 bg-black bg-opacity-60 z-[9999] hidden items-end justify-center"
+       onclick="closeSheet(event)">
+    <div id="sheet-box"
+         class="bg-white w-full max-w-2xl rounded-t-2xl p-5 pb-8 relative">
+      <button onclick="closeSheet()"
+              class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none">×</button>
+      <img id="sheet-img" src="" alt=""
+           class="w-full rounded-xl mb-4 object-cover max-h-64"
+           onerror="this.style.display='none'" style="display:none"/>
+      <p id="sheet-quote"  class="font-bold text-gray-900 text-base mb-1"></p>
+      <p id="sheet-desc"   class="text-orange-600 text-sm mb-3 leading-relaxed"></p>
+      <div id="sheet-chips" class="flex flex-wrap gap-1.5 mb-3"></div>
+      <p id="sheet-text"   class="text-gray-700 text-sm leading-relaxed whitespace-pre-line border-t pt-3 mb-3"></p>
+      <div id="sheet-tags" class="flex flex-wrap gap-1 mb-4 text-xs text-orange-500"></div>
+      <a id="sheet-link" href="#"
+         onclick="window.open(this.href,'_blank','noopener'); return false;"
+         class="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white
+                font-semibold rounded-xl py-3 transition-colors text-sm">
+        在小红书网页版查看完整帖子 →
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const ENTITIES = {"e1": {"id": "e1", "name": "6/12-14周末指南", "url": "https://www.xiaohongshu.com/explore/6a29baf8000000000e038400", "quote": "「湾区6/12-6/14周末活动|夜市+六月节+免费博」", "description": "本周末的总览，夜市、六月节庆典加上免费博物馆日，一文打包。", "neighborhood": null, "venue": null, "time_window": "6/12-6/14", "price": "免费", "themes": ["活动", "文化"], "thumbnail": "images/6a29baf8000000000e038400.webp", "snippet": "", "full_text": "2026年旧金山唐人街夜市回归，每月举办街头节庆活动，带来丰富美食。北加州黄豆与豆腐节、六月节自由庆典、SFMOMA免费家庭日及免费国家公园日等活动精彩纷呈，适合全家人参与。\n#旧金山华人[话题]# #湾区华人资讯网[话题]# #旧金山活动[话题]# #旧金山周末[话题]# #旧金山生活[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a29baf8000000000e038400?xsec_token=ABPVyHajYiFwmVW5P8t5rQsSjrStU6P0UKnElYyFPq04s%3D&xsec_source=", "hashtags": ["旧金山华人", "湾区华人资讯网", "旧金山活动", "旧金山周末", "旧金山生活"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606120152/3e0f76175fd7ac86dcfd1dfa9891dca1/oss-sg/notes/1040g3l03218ctilbnc5g5q82ci9ttt4cqdj8kjo!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/4b8d1843b75ff6ddde31366878ba064f/oss-sg/notes/1040g3l03218ctilbnc4g5q82ci9ttt4c4eoeulo!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/61add1c85b3ad083a44ecaa68ab3807c/oss-sg/notes/1040g3l03218ctilbnc605q82ci9ttt4crdrv0co!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/18620b10eb700f8aa884f6630805463c/oss-sg/notes/1040g3l03218ctilbnc6g5q82ci9ttt4c8hol81g!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/1bc290453c16c870f9e5d2cf11960620/oss-sg/notes/1040g3l03218ctilbnc505q82ci9ttt4cjiie5n0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/ca6163d770fc0056feeb095793d0d231/oss-sg/notes/1040g3l03218ctilbnc405q82ci9ttt4clh43tao!nd_prv_wlteh_jpg_3?src=A"], "video_url": "", "ip_location": "上海", "lat": null, "lng": null, "geocoded": false, "geo_source": "none", "geo_precise": false, "liked_count": 44, "collected_count": 33, "posted_at": 1781139600000}, "e2": {"id": "e2", "name": "San Mateo County Fair", "url": "https://www.xiaohongshu.com/explore/6a2376800000000013020400", "quote": "「San Mateo County Fair提前玩上啦！」", "description": "一年一度的县集市，游乐设施、动物、炸物全套体验，适合一家老小。", "neighborhood": "San Mateo", "venue": "San Mateo County Event Center", "time_window": "6月中旬", "price": "$$", "themes": ["活动", "户外"], "thumbnail": "images/6a2376800000000013020400.webp", "snippet": "", "full_text": "翘班去San Mateo County Fair摸鱼🐥🦋（其实是公司受邀去参加San Mateo County Fair媒体日啦）\n\t\n今年又跟着公司来这个over 100 years历史的嘉年华啦\n作为San Mateo居民，顺便帮City吆喝两声～\n\t\n但！工作是次要的，玩才是正经事👇\n✅ 小鸭赛跑：哦莫裁判的那一声鸭哨把我吓到了，让我的鸭鸭起跑满了[哭惹R]（输了😅）\n✅ 喂蝴蝶：每人拿了一个沾了糖水的棉棒进了一个小帐篷，蝴蝶在你身边飞来飞去，可以用棉棒吸引蝴蝶！好梦幻🦋\n✅ 小动物区：羊咩咩、小猪、小兔、火鸡、鸡… 每一只都想偷回家🐖🐇🐔\n\t\n今天是媒体日，没有游客不用排队赞赞赞！\n\t\n📍San Mateo County Fair\n📅 6月5日～6月14日 （6月8日-9日不开！）\n\t\n晚上九点还有无人机灯展！但白天更适合看动物+坐游乐设施\n\t\n湾区朋友可以冲，带小朋友或者自己去都🉑\n\t\n#好好周末计划[话题]# #换座城市过周末[话题]# #湾区周末[话题]# #湾区生活[话题]# #湾区周末去哪儿[话题]# #湾区美食[话题]# #湾区[话题]# #湾区活动[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a2376800000000013020400?xsec_token=ABijiL83p2gQr7ULGP2P78ANr0KKNKrLAIxftP_wGvKeM%3D&xsec_source=", "hashtags": ["好好周末计划", "换座城市过周末", "湾区周末", "湾区生活", "湾区周末去哪儿", "湾区美食", "湾区", "湾区活动"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202606070120/e58787b12c81ad71cdb8459884c87dfa/oss-sg/notes/1040g3l03212a7a5j7g005oprj6f65u9cco8d2v0!nd_prv_wlteh_jpg_3"], "video_url": "http://sns-video-alos.xhscdn.com/stream_glo/10001/110/258/0aea23749858002c110376019e9a872929_258.mp4?sign=08d5d544245833801fd4134985ffe059&t=6a28f430", "ip_location": "美国", "lat": 37.5456085, "lng": -122.3019104, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "1346 Saratoga Dr, San Mateo, CA 94403, USA", "liked_count": 43, "collected_count": 20, "comment_count": 6, "posted_at": 1780708993000}, "e3": {"id": "e3", "name": "莫奈画展", "url": "https://www.xiaohongshu.com/explore/6a2b14c1000000002202ab26", "quote": "「湾区周末｜De Young 限定莫奈画展mini攻略」", "description": "De Young 限定特展，喜欢印象派的别错过，建议提前订票。", "neighborhood": "Golden Gate Park", "venue": "de Young Museum", "time_window": "展期中", "price": "$$", "themes": ["艺术", "文化"], "thumbnail": "images/6a2b14c1000000002202ab26.webp", "snippet": "", "full_text": "终于去看了心心念念的莫奈展！整个展览主要是莫奈的精选作品和他威尼斯时期的系列作品，通过对水的细致入微观察而描绘了在水倒影下的纷繁世界，水的大小与形态，光落下的角度，万物在水面里轻轻摇晃的倒影与被水赋予的第二次生命\n\t\n他在不同的时间，忘我地站在同一个地方，画下一幅又一幅，只为了让那些清晨、黄昏、雾气和微光，都保留住它们正在呼吸的瞬间…\n以及大名鼎鼎的《睡莲》站在《睡莲》前面的时候，会有一种很奇妙的感觉：明明只是画布，却像是能听见画中的水面与室外的水面汇成一体，交相辉映。\n\t\n展览不算特别大，浏览时间大概1h+，莫奈门票包含了所有地方（如果不看特展的话只是看普通门票的话 CA resident周末是免费的，但需要带证件）\n\t\n莫奈门票：$40\n学生票享有优惠（需要携带学生卡）：$31\n展厅截止到 7.26\n闭馆时间：17:15\n\t\n看完莫奈展之后，可以在16:30之前去Tower 9参观空中玻璃房和360° 的金门公园景色\n\t\n这附近还有 Japanese Tea Garden（18:15之前需要进入）、California Academy of Sciences、San Francisco Botanical Garden（从de yong走路5分钟）\n\t\n📍De Yong Museum：50 Hagiwara Tea Garden Dr, San Francisco, CA 94118\n\t\n#旧金山周末去哪儿[话题]##莫奈[话题]#  #Monet[话题]# #旧金山看展[话题]# #GoldenGatePark[话题]# #湾区周末[话题]# #艺术展攻略[话题]# #睡莲[话题]# #SanFranciscoLife[话题]##湾区生活[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a2b14c1000000002202ab26?xsec_token=ABF4wFSTa0KmhUDC4eIO-8F0cQsQc_rVQwxT63OypZcNc%3D&xsec_source=", "hashtags": ["旧金山周末去哪儿", "莫奈", "Monet", "旧金山看展", "GoldenGatePark", "湾区周末", "艺术展攻略", "睡莲", "SanFranciscoLife", "湾区生活"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606122307/ee25d2a31462a186d28567e5847921bc/1040g2sg3219o2hhon07g5pdrcbrifsaepf6k4g0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/3853cd9541d3bc9905d89af4bd7a0786/1040g2sg3219o2hhon0705pdrcbrifsae8jrp3mg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/7a65f862d2f55a6d6003ab62a1c56735/1040g2sg3219o2hhon0805pdrcbrifsae2jv02fg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/3547badac5bf7b91f56e63bd16db4881/1040g2sg3219o2hhon08g5pdrcbrifsae3j1j1v8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/04f7972ca36977922fb6bc3d3ecabf2e/1040g2sg3219o2hhon0905pdrcbrifsaebr9vdo8!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/4e2a9bf5613bbe611b70ec240a00ebd5/1040g2sg3219o2hhon09g5pdrcbrifsaek8pg348!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/3bf386c6dc1d0ea2cb686ce81e3babba/1040g2sg3219o2hhon0a05pdrcbrifsaebpj4fcg!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/4f359d989f59ba83408d02a69d5f86cf/1040g2sg3219o2hhon0ag5pdrcbrifsaeb9sonm8!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/970d9f7647abbaa7f417147780312514/1040g2sg3219o2hhon0b05pdrcbrifsaee5ef7oo!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/8eb89c52e5869bc8dfa04e9b65d66ebe/1040g2sg3219o2hhon0bg5pdrcbrifsaeobqtn30!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/75ae7e091871d7f38e808dfa67dd6850/1040g2sg3219o2hhon0c05pdrcbrifsaeioogp7o!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/d297d4864a794aebe623a7e4b7056370/1040g2sg3219o2hhon0cg5pdrcbrifsaert4ul48!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/edb2b8c6c4c215f64ec85ed9678c82e4/1040g2sg3219o2hhon0d05pdrcbrifsae090t220!nd_prv_wgth_jpg_3?src=A"], "video_url": "", "ip_location": "美国", "lat": 37.771469, "lng": -122.4686755, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "50 Hagiwara Tea Garden Dr, San Francisco, CA 94118, USA", "liked_count": 40, "collected_count": 6, "comment_count": 3, "posted_at": 1781208257000}, "e4": {"id": "e4", "name": "盐田千春展", "url": "https://www.xiaohongshu.com/explore/69d041130000000023017463", "quote": "「旧金山湾区｜盐田千春新展实话实说…」", "description": "红线编织出的沉浸式装置，今年湾区最值得排队的当代艺术展。", "neighborhood": "SOMA", "venue": "SFMOMA", "time_window": "展期中", "price": "$$", "themes": ["艺术", "文化"], "thumbnail": "images/69d041130000000023017463.webp", "snippet": "", "full_text": "真的很赞！！！！\n我特地提前很早的去，挑了一个没什么人的时间尝鲜，但是由于去的太匆忙就没来得及化妆打扮 [失望R]，不过预感觉得真的很容易出片 [自拍R]，只能下次再挑战。先把几张美图发出来打个卡，给各位参考一下。作品比想象中的还要大、还要多，所以还是蛮值得去亲身体验的 [赞R]。以后的周末预期都会有很多人，所以要尽量避开高峰人群才能拍到背景干净的照片。我会建议穿深色衣服，或者浅色也可以，但是颜色太鲜艳的可能跟这个大红会比较冲撞 [笑哭R]。\n📍地点：@Asian Art Museum\n🏛️展览：“Chiharu Shiota: Two Home Countries”\n🗓️日期：4月3日至7月20日\n🎟️购票：网上搜索官网地址\n\t\n#旧金山[话题]# #湾区[话题]# #湾区生活[话题]# #湾区周末[话题]# #看展[话题]# #盐田千春[话题]# #湾区打卡[话题]# #湾区周末去哪儿[话题]# #艺术展览[话题]# #OOTD[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/69d041130000000023017463?xsec_token=ABj7RmEUiJS7lVcdhd_BB1giy9GRO2MJyVtSVygrqZUF8%3D&xsec_source=", "hashtags": ["旧金山", "湾区", "湾区生活", "湾区周末", "看展", "盐田千春", "湾区打卡", "湾区周末去哪儿", "艺术展览", "OOTD"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202605270616/55e327406f4267e778c7f63e89806929/notes_pre_post/1040g3k031uh35ud8ia005nvun64g96ta3d30s2o!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270616/877eeffd69670d40a3af4e7c32b8dfde/note_pre_post_uhdr/1040g3r031uh1nc7j2q0g5nvun64g96tao37juu0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270616/cb696e085872889b853b5dde704ad352/note_pre_post_uhdr/1040g3r031uh1nc7j2q105nvun64g96takqr5ak8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270616/e01796cf731672809f77351382125389/note_pre_post_uhdr/1040g3r031uh1nc7j2q1g5nvun64g96ta9vvtj2o!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270616/a18fd8a7094a721b638ba0ea5bc328f9/note_pre_post_uhdr/1040g3r031uh1nc7j2q205nvun64g96tat797de0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270616/b270f52c34ff63d4ae036496fa44575e/note_pre_post_uhdr/1040g3r031uh1nc7j2q2g5nvun64g96tavnlugco!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270616/f29c46355b7dd15358fafd351e162a0a/note_pre_post_uhdr/1040g3r031uh1nc7j2q305nvun64g96tatkfo1mg!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "", "lat": 37.7857182, "lng": -122.4010508, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "151 3rd St, San Francisco, CA 94103, USA", "liked_count": 203, "collected_count": 167, "comment_count": 12, "posted_at": 1775255827000}, "e5": {"id": "e5", "name": "Bouquets to Art", "url": "https://www.xiaohongshu.com/explore/69ae55450000000022031a9a", "quote": "「SF看展｜Bouquets to Art 2026 💐」", "description": "花艺师以馆藏作品为灵感创作花束，一年只有一次的春日限定。", "neighborhood": "Golden Gate Park", "venue": "de Young Museum", "time_window": "6月限定", "price": "$$", "themes": ["艺术", "活动"], "thumbnail": "images/69ae55450000000022031a9a.webp", "snippet": "", "full_text": "📍DeYoung Museum\n📍Legion of Honor\n\t\n周末趁着三番花展最后一天和好姐妹进城看展，一次性把两个展馆都去了。可能因为今天是特展最后一天，展馆人山人海，摩肩接踵一点不夸张。花着💲44比凡尔赛宫还贵的门票，在博物馆体验了一把在高峰地铁站🚉\n\t\n这次花展的策展逻辑其实很清晰，每一件花艺作品都与馆内的一件艺术品一一对应。很多创作都是通过花材的形态与色彩，去回应原作中的结构与氛围。\n但看完之后，我还是隐约觉得这种“命题式创作”多少限制了花艺师的发挥。原本期待能看到那种不受束缚、像植物自然生长般充满生命力的花艺表达，而当创作被主题框定之后，有些作品难免显得收敛了一些，也让人觉得略微可惜。\n\t\n最美的当属Legion of Honor进门的10号展厅(p\n13) 大型的花艺装置像是活的一样的生长在中庭，和雕塑浑然一体，只是大家都觉得这里最美，所以人山人海，也拍不出肉眼看出的效果。\n\t\n#湾区周末[话题]# #艺术展打卡[话题]# #城市看展去[话题]# #带你云看展[话题]# #在展览现场[话题]# #拍照超美的展览[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/69ae55450000000022031a9a?xsec_token=AB7rGmRXRZQ2vGZuuJLGTHCwZSVE_lGjlm6XjNxdh4_ik%3D&xsec_source=", "hashtags": ["湾区周末", "艺术展打卡", "城市看展去", "带你云看展", "在展览现场", "拍照超美的展览"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202606070120/78e54202c99e717cc46373c5f4ba0c7e/notes_pre_post/1040g3k031tftlsoj5a5g4a14u1c782kn6ghdf8g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/c5c0426599a78e7d3fb6f8f9cfc7e99f/notes_pre_post/1040g3k031tftlsoj5a0g4a14u1c782kn0gki980!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/e2a7ccc55fefcd9cca02001b320fe7f8/notes_pre_post/1040g3k031tftlsoj5a104a14u1c782knkvk02oo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/55ae94df39112f50d8e6daa1a3c9849e/notes_pre_post/1040g3k031tftlsoj5a1g4a14u1c782kno3p866g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/3ee328f01a39159dabfff27dc218e869/notes_pre_post/1040g3k031tftlsoj5a204a14u1c782kng0fh1dg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/f196b02df09ce7b29e79c76d3517c776/notes_pre_post/1040g3k031tftlsoj5a2g4a14u1c782knrnqfvto!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/4e5709d7c0dee134a439098cd06e5407/notes_pre_post/1040g3k031tftlsoj5a304a14u1c782kn34q6lb0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/50289442d783e8e85d5e1970da6b5ce8/notes_pre_post/1040g3k031tftlsoj5a3g4a14u1c782kni1jib30!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/7c92e3b1028b0110d35318f7b09b14f8/notes_pre_post/1040g3k031tftlsoj5a404a14u1c782knvrm7vgo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/3872ad750921807a40d76cce1e8e2bcb/notes_pre_post/1040g3k031tftlsoj5a4g4a14u1c782knj01pjh0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/7c73a90eedf1f7d273b6e5db6f7201c6/notes_pre_post/1040g3k031tftlsoj5a504a14u1c782kngmq2nro!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/35d6e45c04c4dd29204770d2ebfd983e/note_pre_post_uhdr/1040g3r831tfto5cj5a7g4a14u1c782kn1vpmps0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/65d1e83de7b2bcab214982afce495eb7/note_pre_post_uhdr/1040g3r831tfto5cj5a804a14u1c782kn9f59qpo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/3d3b1168cc2847eab5559f968c40bea8/note_pre_post_uhdr/1040g3r831tfto5cj5a8g4a14u1c782knaf9f6po!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/a8922cef584202d310d61965da7f78c1/note_pre_post_uhdr/1040g3r831tfto5cj5a904a14u1c782knukku9g0!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "", "lat": 37.771469, "lng": -122.4686755, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "50 Hagiwara Tea Garden Dr, San Francisco, CA 94118, USA", "liked_count": 37, "collected_count": 14, "comment_count": 9, "posted_at": 1773032773000}, "e6": {"id": "e6", "name": "斯坦福艺术展", "url": "https://www.xiaohongshu.com/explore/6a2382260000000021008f3d", "quote": "「湾区艺术娃看过来～免费参加斯坦福艺术展」", "description": "Cantor 艺术馆免费开放，亲子友好，可以顺便逛逛校园。", "neighborhood": "Palo Alto", "venue": "Cantor Arts Center", "time_window": "周末", "price": "免费", "themes": ["艺术", "文化"], "thumbnail": "images/6a2382260000000021008f3d.webp", "snippet": "", "full_text": "有一个在斯坦福举办的艺术展览现在在征集作品，是高中生增加经历，初中生拓宽视野，小学生发展兴趣的好机会！作品被选中的话是免费参展的。活动介绍如下：\nVessel（容器/脉络）是由 CP Mentorship 和 Art2 Foundation 联合主办的一项经专家评审的艺术展览。该展览将在斯坦福大学卡内基科学研究所（Stanford University Carnegie Institution）展出，汇集了本地、全美以及少数受邀的国际艺术家们具有深刻思想概念的作品。本届展览欢迎多样化的艺术实践，包括绘画、雕塑、素描、摄影、混合媒介以及跨学科作品。\n地点：\n斯坦福大学卡内基研究所，植物生物学系\n260 Panama St, Stanford, CA 94305\n入选作品递交：\n入选作品可于 6 月 19 日上午 11点 至 下午 2点 之间亲手递交。\n重要日期：\n• 6 月 15 日： 申请截止\n• 6 月 17 日： 通过电子邮件通知评审结果\n• 6 月 19 日 上午 11:00 - 下午 2:00： 艺术品递交\n• 6 月 20 日 - 21 日 上午 11:00 - 下午 5:00： 展览日期\n• 6 月 20 日 下午 3:00 - 下午 5:00： 艺术家招待会 / 仪式\n• 6 月 21 日 下午 5:00 - 晚上 7:00： 参展艺术品取回\n#湾区[话题]# #湾区生活[话题]# #湾区遛娃[话题]# #硅谷[话题]# #硅谷教育[话题]# #加州生活[话题]# #艺术[话题]# #艺术展[话题]# #教育资源[话题]# #画画[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a2382260000000021008f3d?xsec_token=ABijiL83p2gQr7ULGP2P78APn-A14Cefr5S6-LRe1mwxM%3D&xsec_source=", "hashtags": ["湾区", "湾区生活", "湾区遛娃", "硅谷", "硅谷教育", "加州生活", "艺术", "艺术展", "教育资源", "画画"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202606070120/d14e79b43f23d3137d2b18230744a903/1040g0083212bs36v7k005nb3e1r0be6e625ielo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/c85931692c7acd84edda41d294417b21/1040g0083212bs36v7k0g5nb3e1r0be6eefcgvho!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/5d7211c600c62501b4ca38129b831971/1040g0083212bs36v7k105nb3e1r0be6e9kumuq8!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "美国", "lat": 37.4329672, "lng": -122.1705266, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "328 Lomita Dr, Stanford, CA 94305, USA", "liked_count": 12, "collected_count": 9, "comment_count": 1, "posted_at": 1780711974000}, "e7": {"id": "e7", "name": "San Jose 美术馆", "url": "https://www.xiaohongshu.com/explore/6a24cc080000000013020401", "quote": "「来支持一下San Jose Museum of Art」", "description": "南湾的当代艺术据点，规模不大但展览策划很用心。", "neighborhood": "San Jose", "venue": "San Jose Museum of Art", "time_window": null, "price": "$", "themes": ["艺术", "文化"], "thumbnail": "images/6a24cc080000000013020401.webp", "snippet": "", "full_text": "很久没来了，San Jose Downtown比想象中干净有序了不少，艺术博物馆也多了些新展品和特展。馆藏也很有硅谷的特色，有些作品就是用废弃的电路板和电子元件做的。\n\t\n今天看得最enjoy的是二楼的特展Loose Ends（图3-10），来自艺术家ektor garcia。他的作品有Ruth Asawa的感觉，不断的手工重复让作品有劳动和时间的痕迹。但对比Ruth Asawa（图12），ektor garcia的作品少了些规整平衡，多了些随意自由，更少的设计感更多的实验性，就好像他的人生足迹一样，游牧式的生活，不断探索可能性。这个特展明天6月7日结束。\n\t\nBOA用户每月第一个周末都可以免费参观博物馆，是个很不错的福利。本以为这周末人应该会不少，没想到相比三番的艺术馆来说，只能用冷清来形容。以后还是多多支持一下！\n\t\n#湾区周末去哪儿[话题]# #圣何塞艺术博物馆[话题]# #SanJoseMuseumOfArt[话题]# #湾区博物馆[话题]# #ektorgarcia[话题]# #RuthAsawa[话题]# #湾区看展[话题]# #编织艺术[话题]# #手工艺术家[话题]# #带你云看展[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a24cc080000000013020401?xsec_token=ABY5AOkAh-vd-M4v1RvE3BcvbEJ-AHs2AOF-ON9FZYhuQ%3D&xsec_source=", "hashtags": ["湾区周末去哪儿", "圣何塞艺术博物馆", "SanJoseMuseumOfArt", "湾区博物馆", "ektorgarcia", "RuthAsawa", "湾区看展", "编织艺术", "手工艺术家", "带你云看展"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202606110057/64cd9d653a485ccef37669ea7cfd93d3/oss-sg/notes_pre_post/1040g3mo3213k30fqni005nmtplggbpr2rk0keh0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/5d2338be27ca07d49b6f6ee7b943a7d9/note_pre_post_uhdr/1040g3r83213k30g97c705nmtplggbpr25a70d1g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/d104ff1b1dc0e6fbcf59b95c353887d4/note_pre_post_uhdr/1040g3r83213k30g97c7g5nmtplggbpr21lee7lo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/dc09bdf7b2df8cf5cb3cb124eb761c79/note_pre_post_uhdr/1040g3r83213k30g97c805nmtplggbpr224c5e88!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/fd251102bcaeccacd56a043eb5f3feb9/note_pre_post_uhdr/1040g3r83213k30g97c8g5nmtplggbpr27uj5ft8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/37106016968a7aa4f96b74e0349b3871/note_pre_post_uhdr/1040g3r83213k30g97c905nmtplggbpr26r3hiho!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/fef6a254f66cebdb84221acf0ee6b6f9/note_pre_post_uhdr/1040g3r83213k30g97c9g5nmtplggbpr2458e63o!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/ebf3e553c706025d071030b1fce54523/note_pre_post_uhdr/1040g3r83213k30g97ca05nmtplggbpr2f1672e0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/01b931aebbae20781b72402041f14344/note_pre_post_uhdr/1040g3r83213k30g97cag5nmtplggbpr2emfmj7g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/da8f40c55274f6934fd6da795a94ed84/note_pre_post_uhdr/1040g3r83213k30g97cb05nmtplggbpr23nrl54g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/b7c467fafa257b26b530cfb9f292c99b/note_pre_post_uhdr/1040g3r83213k30g97cbg5nmtplggbpr22fhr678!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/89e94191e60e98e50f19b749bd8ebe3d/note_pre_post_uhdr/1040g3r83213k30g97cc05nmtplggbpr2oqmetag!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/beec53c64289a59701a542e8c1b29d58/note_pre_post_uhdr/1040g3r83213k30g97ccg5nmtplggbpr2qj6aue0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/64d5d9456c1093c925e49b0b4af03840/note_pre_post_uhdr/1040g3r83213k30g97cd05nmtplggbpr2q9n12r0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/6c64c05ac7167baea6c47b3b13cd9e90/note_pre_post_uhdr/1040g3r83213k30g97cdg5nmtplggbpr25a29dtg!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/0fbb52f978c96d7c89b247333bf32127/note_pre_post_uhdr/1040g3r03213k3entn6005nmtplggbpr21iimguo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/cc2f29e88aa9c508a61171f85d98405b/note_pre_post_uhdr/1040g3r03213k3entn60g5nmtplggbpr2r74cmvo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606110057/ebcf1acf0dc105ea2bffbf9e702aaa26/note_pre_post_uhdr/1040g3r03213k3entn6105nmtplggbpr2fcsdom0!nd_prv_wgth_jpg_3"], "video_url": "", "ip_location": "美国", "lat": 37.3337262, "lng": -121.8899245, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "110 S Market St, San Jose, CA 95113, USA", "liked_count": 14, "collected_count": 3, "posted_at": 1780796424000}, "e8": {"id": "e8", "name": "侨批展", "url": "https://www.xiaohongshu.com/explore/6a13e0d6000000003502e9e3", "quote": "「一封侨批，穿越山海的思念｜湾区之眼」", "description": "以早期华人移民书信为主题的小型展览，情感厚重值得静下来看。", "neighborhood": "Chinatown", "venue": "Chinese Historical Society of America", "time_window": null, "price": "$", "themes": ["文化", "艺术"], "thumbnail": "images/6a13e0d6000000003502e9e3.webp", "snippet": "", "full_text": "这个月看了《给阿嬷的情书》，\n电影结束之后意犹未尽，更想了解这一段故事的历史\n\t\n那个年代，一封从南洋寄回来的信，\n要走多远才能到家人手里？\n信里装的是钱、是报平安、是想念，但又不止这些。💌\n\t\n刚好文博会宝安湾区之眼分展区\n开了侨批特展\"一纸侨批平山海\"，\n21号开幕，展到8月20日，我专程去了一趟。\n\"侨批\"这个词，很多人可能第一次听。\n它是旧时海外华侨寄回家乡的信和汇款的合称，\n一纸之上，一边是钱，一边是家书，两件事一起完成\n因为那个年代，寄钱和寄信都不容易，\n能合在一起，是最省力、也最情深的方式。📜\n展览里陈列了大量真实的侨批原件，\n信纸泛黄，字迹工整，有些写得密密麻麻，有些只有寥寥几行。\n读下去才慢慢感受到，这些信写于战乱、写于漂泊、写于对家人不知死活的担忧，\n站在展柜前，慢慢读慢慢看，更加真实的感受到了那个年代✨\n看完特展，整个状态还没缓过来，\n就顺着往里走，湾区之眼还有不少好东西\n\t\n🌌 三体宇宙华南首店，超级战舰缩微模型就在现场，很适合打卡；\n🔍 福尔摩斯沉浸式探案华南首展，1:1还原贝克街221B，有剧本杀+NPC互动；\n🎪 文创市集也逛了一圈，有独立设计师和非遗机构，手慢无。\n\t\n展览部分持续到8月，但文博会期间人气最旺，建议趁这几天去。\n\t\n📍 宝安区湾区之眼\n#文博会[话题]##深圳文博会[话题]##湾区之眼[话题]##侨批特展[话题]##给阿嬷的情书[话题]##深圳好去处[话题]##深圳打卡[话题]##文化展览[话题]##深圳旅游[话题]##探展打卡[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a13e0d6000000003502e9e3?xsec_token=ABjfJF9CJdGIdkinI9twZUqncAzsRqVD6NnaLnfinutRo%3D&xsec_source=", "hashtags": ["文博会", "深圳文博会", "湾区之眼", "侨批特展", "给阿嬷的情书", "深圳好去处", "深圳打卡", "文化展览", "深圳旅游", "探展打卡"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606122307/45a8af9b7f9a6e35c9dafeb31dabc69b/notes_pre_post/1040g3k0320j3aonfli005oglk0ak1gouli6rnn8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/e0fe7d48d7080227193add8140b8761d/notes_pre_post/1040g3k0320j3aonfli0g5oglk0ak1goufu413io!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/003fc755d7c4d45259a0d397ed51be6b/notes_pre_post/1040g3k0320j3aonfli105oglk0ak1gou2buhtho!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/9c3536b36e5009372a8224f972c3443e/notes_pre_post/1040g3k0320j3aonfli1g5oglk0ak1gou04ti89o!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/53119a65fd5541267d9c9dd885da1140/notes_pre_post/1040g3k0320j3aonfli205oglk0ak1gouk756ud8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/b5b97acb149c359c362a97ed205e03f4/notes_pre_post/1040g3k0320j3aonfli2g5oglk0ak1gou0t4ehv0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/512574d60b825167d5843b60787fb023/notes_pre_post/1040g3k0320j3aonfli305oglk0ak1gouchuron0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/7077988d31f8408f4032d6b8d4c3bb94/notes_pre_post/1040g3k0320j3aonfli3g5oglk0ak1gouchahc38!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/f0b137d336f9b0401cdb2b03138009f9/notes_pre_post/1040g3k0320j3aonfli405oglk0ak1gou4ruenoo!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/4ddedb6f89362474a4f1a5467c40c00f/notes_pre_post/1040g3k0320j3aonfli4g5oglk0ak1gousjp6id0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/00962494c164d03fd761dd64e84f3195/notes_pre_post/1040g3k0320j3aonfli505oglk0ak1gou74kgtvg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/0ac94d45ed5ae35952c18aaa61cd958b/notes_pre_post/1040g3k0320j3aonfli5g5oglk0ak1goutb7gtr8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/9a2ddd7a7c810b107b417fd3bdb5c1ef/notes_pre_post/1040g3k0320j3aonfli605oglk0ak1gou11n1deo!nd_prv_wlteh_jpg_3?src=A"], "video_url": "", "ip_location": "广东", "lat": 37.7938363, "lng": -122.408787, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "965 Clay St, San Francisco, CA 94108, USA", "liked_count": 106, "collected_count": 53, "comment_count": 10, "posted_at": 1779687638000}, "e9": {"id": "e9", "name": "Family Fun Day", "url": "https://www.xiaohongshu.com/explore/6a265e84000000000800b800", "quote": "「Los Altos的Family fun day也太好玩了」", "description": "Los Altos 小镇的社区嘉年华，免费、热闹、特别松弛。", "neighborhood": "Los Altos", "venue": "Downtown Los Altos", "time_window": "周末", "price": "免费", "themes": ["活动", "户外"], "thumbnail": "images/6a265e84000000000800b800.webp", "snippet": "", "full_text": "活动10点就开始了，11点多才到就开始做手工了，感觉这是湾区参加的最适合小朋友的手工的地方，因为整个场地人不多，而且干净整洁。\n有吃有喝有玩啊。。每个小盆友有一个snack和果汁，碰上爱德蒙最爱的🐟cheese饼干，他完全开心的只记得吃，完全忘记了做手工。。[捂脸R][捂脸R]\n很多的手工craft也很用心，比如说有些拼图加上颜色，有几个mini 积木🌹拼完可以自己拿走，还有很多sticker自己做制作夏日的帽子，爱德蒙做完就马上带上了，红色配红衣。。绿色配绿衣。\n\t\n然后意外发现downtown旁边的park也好好玩啊，绿树成荫，有一条骑自行车不担心会骑到外面同时两个地方有分开的playground，有玩沙子地方也有各种滑滑梯,跷跷板，主要是绿树成荫太舒服了，不至于暴晒。。\n关键是周末人也不多，真的是遛娃友好park。\n住在附近的人太幸福了呀。。\n#湾区遛娃[话题]# #3岁宝宝[话题]# #娃的兴趣养成记[话题]# #北美独立带娃[话题]# #萌娃[话题]# #陪伴孩子的美好时光[话题]# #周末溜娃[话题]# #亲子[话题]# #小朋友的快乐[话题]# #湾区生活[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a265e84000000000800b800?xsec_token=ABLNDeXdT7IzIZC5yZLX3XK0KlLBPOwSqJnePePxMxCq4%3D&xsec_source=", "hashtags": ["湾区遛娃", "3岁宝宝", "娃的兴趣养成记", "北美独立带娃", "萌娃", "陪伴孩子的美好时光", "周末溜娃", "亲子", "小朋友的快乐", "湾区生活"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606122307/43e44f32ab16b657f7db495536fcd585/note_pre_post_uhdr/1040g3r832154143unscg5npukto08n2o587tm3o!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/1d38715d0556d87d3e69427ccf637d28/note_pre_post_uhdr/1040g3r832154143unsd05npukto08n2oteqrpbg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/eb1ed04e951db5d0d30dbf527f15fa73/note_pre_post_uhdr/1040g3r832154143unsdg5npukto08n2o756rcg8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/6529985c0887a5753531b4a1ce67f862/note_pre_post_uhdr/1040g3r0321555ddd76005npukto08n2oqed00r0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/c815662f007c20f5fe6e0d8a21d86267/note_pre_post_uhdr/1040g3r0321555ddd760g5npukto08n2o1tlepa0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/edb515b1951dc5f44d87725b101134b6/note_pre_post_uhdr/1040g3r0321555ddd76105npukto08n2ooc0anp8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/fba85cddba90cce7f1e59d67540aef1a/note_pre_post_uhdr/1040g3r0321555ddd761g5npukto08n2ol919aco!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/189c060910ec70dc9f8feb79908714c5/note_pre_post_uhdr/1040g3r0321555ddd76205npukto08n2o4ntm3u0!nd_prv_wlteh_jpg_3?src=A"], "video_url": "", "ip_location": "美国", "lat": 37.3813639, "lng": -122.1142578, "geocoded": true, "geo_source": "google_neighborhood", "geo_precise": false, "neighborhood_canonical": "Los Altos, CA, USA", "liked_count": 12, "collected_count": 4, "comment_count": 2, "posted_at": 1780899460000}, "e10": {"id": "e10", "name": "飞机秀遛娃日", "url": "https://www.xiaohongshu.com/explore/6a291fcf000000001702de6a", "quote": "「湾区周末遛娃，飞机秀、泡泡节、free艺术日」", "description": "飞机表演、泡泡节、免费艺术日三件套，是这周最适合带娃的组合。", "neighborhood": null, "venue": null, "time_window": "6/12-6/14", "price": "免费", "themes": ["活动", "户外"], "thumbnail": "images/6a291fcf000000001702de6a.webp", "snippet": "", "full_text": "这周末湾区娃真的太幸福了，能玩的活动一下子全来了。\n不想只去 playground 的，有内容的都给你筛好了。\n\t\n---\n\t\n#湾区遛娃[话题]# #湾区亲子活动[话题]# #湾区周末去哪儿[话题]# #湾区妈妈[话题]# #湾区小朋友[话题]# #半岛遛娃[话题]# #南湾遛娃[话题]# #旧金山亲子[话题]# #SanMateoCountyFair[话题]#  #SFMOMA[话题]# #Filoli[话题]# #ArdenwoodHistoricFarm[话题]#  #湾区周末活动[话题]# #好好周末计划[话题]# #育儿经验howto[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a291fcf000000001702de6a?xsec_token=ABPVyHajYiFwmVW5P8t5rQsedVShSpHskIWyQSgq96mtg%3D&xsec_source=", "hashtags": ["湾区遛娃", "湾区亲子活动", "湾区周末去哪儿", "湾区妈妈", "湾区小朋友", "半岛遛娃", "南湾遛娃", "旧金山亲子", "SanMateoCountyFair", "SFMOMA", "Filoli", "ArdenwoodHistoricFarm", "湾区周末活动", "好好周末计划", "育儿经验howto"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606122307/fb696b7d72dac876f14c7e9456dc006a/notes_pre_post/1040g3k03217r9i667k005onhq9f7qlba01m4f1g!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/fd3696ca191dc2eb1f2d28ce9d84d34b/notes_pre_post/1040g3k03217r9i667k0g5onhq9f7qlbaoa3o398!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/21e35de8fd1f93020dddb1fe8cbd74c2/notes_pre_post/1040g3k03217r9i667k105onhq9f7qlbamsflnso!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/cdb1de46509e526b240787dec06b4b17/notes_pre_post/1040g3k03217r9i667k1g5onhq9f7qlbaabmq0bg!nd_prv_wlteh_jpg_3?src=A"], "video_url": "", "ip_location": "美国", "lat": null, "lng": null, "geocoded": false, "geo_source": "none", "geo_precise": false, "liked_count": 231, "collected_count": 293, "comment_count": 19, "posted_at": 1781080015000}, "e11": {"id": "e11", "name": "小猪赛跑", "url": "https://www.xiaohongshu.com/explore/6a286c0d00000000070114a3", "quote": "「湾区生活｜小猪赛跑来了🐷」", "description": "county fair 时段的固定节目，迷你小猪比赛比想象中刺激。", "neighborhood": "San Mateo", "venue": "San Mateo County Event Center", "time_window": "6月", "price": "$", "themes": ["活动"], "thumbnail": "images/6a286c0d00000000070114a3.webp", "snippet": "", "full_text": "一年一度的San Mateo County Fair来了！\n最爱小猪赛跑和小鸭赛游泳\n比赛的schedule在官网有 一般隔两小时一场\n\t\n除了赛跑外 还有各种农场的小动物展览🐮🐑🐰\n有趣的摊位\n嘉年华的游乐设施🎡🎢\n美味的火鸡腿🍗 比手大的鸡肉串和各种美食\n以及Live Band\n大人小孩都能逛的开心[派对R]\n\t\n入场门票在官网提前购买比现场便宜一点点\n门口停车场可刷卡可现金\n\t\n#湾区生活[话题]# #湾区周末[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a286c0d00000000070114a3?xsec_token=AB5U0z8CD8AuBceK35Y1Pex2kU1v6S6Lo1ZB7IRihp_hM%3D&xsec_source=", "hashtags": ["湾区生活", "湾区周末"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606120152/c1627a626aed28f53cfb6cf713e25fb3/1040g00832175787r7u004a0e741gdj88d3gpg78!nd_prv_wlteh_jpg_3?src=A"], "video_url": "http://sns-v8.rednotecdn.com/stream/79/110/259/01ea286adb711429010370039eade65ded_259.mp4", "ip_location": "美国", "lat": 37.5456085, "lng": -122.3019104, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "1346 Saratoga Dr, San Mateo, CA 94403, USA", "liked_count": 13, "collected_count": 2, "comment_count": 5, "posted_at": 1781033997000}, "e12": {"id": "e12", "name": "Land's End", "url": "https://www.xiaohongshu.com/explore/69fafa48000000001b0220f2", "quote": "「旧金山 Land's End 陆地尽头」", "description": "沿着断崖看金门大桥的经典 trail，6 月雾季也别有味道。", "neighborhood": "Outer Richmond", "venue": "Lands End Lookout", "time_window": null, "price": "免费", "themes": ["户外", "宝藏地点"], "thumbnail": "images/69fafa48000000001b0220f2.webp", "snippet": "", "full_text": "这个世界上有很多地方都有叫 Land's End ，我知道英国和墨西哥都有。虽然没去过别的 Land's End，但旧金山的这个 Land's End 大概是三藩市最迷人的一条 Trail 了。\n\t\n树、大海、金门大桥都可以在这里看到，而且这条 trail 难度很低，一点点上下坡，所以一路都能看到不少慢慢悠悠散步和遛狗的人。如果真的懒得走，甚至可以在停车场坐着看日落。唯一的缺点是有时候风大或者有雾，三藩典型天气了。\n\t\n停车可以停到 Land's End Lookout，路边也有很多位子，所以停车简单。Lookout 下来就是 Sutro Baths，废弃的浴场遗址，从那里可以看到 P5 上那块中间带❤️的礁石。这里也是很多人拍婚纱照的地方。P7 是这次在靠近海边的水槽里看到了散落的花，可能是某对情侣拍完照留下的吧。\n\t\n📌：Land's End Trail, San Francisco\n📅：2026年2月26号\n\t\n@摄影薯 @户外薯 #老派旅行[话题]# #摄影[话题]# #对我友好的旅行[话题]# #慢人友好旅行[话题]# #加州[话题]# #旧金山湾区[话题]# #湾区周末去哪儿[话题]# #howto过春天[话题]# #howto反向旅游[话题]# #一万种旅行howto[话题]# @HOWTO薯", "xsec_url": "https://www.xiaohongshu.com/explore/69fafa48000000001b0220f2?xsec_token=ABe_u1PFj0aFKWvTLLMQDrnqstePmRvZyx8RvQNNqama4%3D&xsec_source=", "hashtags": ["老派旅行", "摄影", "对我友好的旅行", "慢人友好旅行", "加州", "旧金山湾区", "湾区周末去哪儿", "howto过春天", "howto反向旅游", "一万种旅行howto"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202605270646/5537c85d379db0ace3b159f4e9968d24/spectrum/1040g34o31vqp46pq548g5plirk0nca34medl8j8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/49809d08fa187ba5c98c77d37d64488a/spectrum/1040g34o31vqp46pq54805plirk0nca344bb6gk8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/6b2b2583d585d62d2ac3fbde7801a2e3/spectrum/1040g34o31vqp46pq546g5plirk0nca34s8hc620!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/3916d9340bf873cd53c963d31c0549c9/spectrum/1040g34o31vqp46pq54705plirk0nca34qcopilg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/96a84ab2bf02538f610536a6aceff79f/spectrum/1040g34o31vqp46pq549g5plirk0nca34bknf4go!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/b9f00b6454a41342b5940d91ea777dd7/spectrum/1040g34o31vqp46pq54b05plirk0nca34ksvrs6g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/7a6111d02d3f061cc35966779a5fe067/spectrum/1040g34o31vqp46pq54ag5plirk0nca34g91mvh8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/8f5773cf830a02fdc02ade339c8cb7a2/spectrum/1040g34o31vqp46pq54a05plirk0nca34gun0j70!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/60bc6cd03aa2dbf188647ddd28dd6356/spectrum/1040g34o31vqp46pq54905plirk0nca34sis90go!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/0e9f69421dc9922db39d3496885e7b0d/spectrum/1040g34o31vqp46pq54bg5plirk0nca34k3dpsl8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/e7e4a0a1c9b2aca5f9a094cdda4e1008/spectrum/1040g34o31vqp46pq54c05plirk0nca34fn7p34o!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/a6f568e3090922b7f77c19142daee1d3/spectrum/1040g34o31vqp46pq54cg5plirk0nca347203lho!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "美国", "lat": 37.7774856, "lng": -122.4996397, "geocoded": true, "geo_source": "google_neighborhood", "geo_precise": false, "neighborhood_canonical": "Outer Richmond, San Francisco, CA 94121, USA", "liked_count": 1850, "collected_count": 1255, "comment_count": 79, "posted_at": 1778285821000}, "e13": {"id": "e13", "name": "Rodeo Beach", "url": "https://www.xiaohongshu.com/explore/69cfea72000000001f00670b", "quote": "「湾区抑郁者的治愈之所｜Rodeo Beach」", "description": "Marin Headlands 的彩石海滩，开过隧道就是另一种安静。", "neighborhood": "Marin Headlands", "venue": "Rodeo Beach", "time_window": null, "price": "免费", "themes": ["户外", "宝藏地点"], "thumbnail": "images/69cfea72000000001f00670b.webp", "snippet": "", "full_text": "为什么湾区大部分人都很焦虑..\n我觉得相比焦虑 大部分人是抑郁\n极度限制的娱乐项目\n精英阶级的内卷\n股票房子升职\n还有可能大部分人身份的压力\n任何事只能靠自己\n或者非常靠谱的朋友\n还要时刻小心 毕竟人言可畏\n难道不是因为在国内卷够了才来这里的吗\n结果跑来接着卷\n笑死\n-\n周末在这边走了走\n拿起了许久不拿起来的相机\n再次感叹一下湾区真的贫瘠\n但有时被治愈的时刻也非常简单\ngolden hour的光恰如其分\n弹琴唱歌的青少年\n互相拍照的人们\n看我拿起相机举手比耶的大哥\n高耸山崖上盛开的漫山遍地的花\n适时提醒着心如死灰的我\n嗯 你还好好活着呢\n\t\n#北湾[话题]#\n#湾区周末[话题]#\n#湾区摄影[话题]#\n#春天拍照[话题]#\n#春和景明[话题]#\n#湾区生活[话题]#\n#生命是一场修行[话题]#\n#高敏者的自我救赎[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/69cfea72000000001f00670b?xsec_token=AB7diEr6NMX-0yeFHUJqisAg36yvk1MuVBU_LMRMCddIA%3D&xsec_source=", "hashtags": ["北湾", "湾区周末", "湾区摄影", "春天拍照", "春和景明", "湾区生活", "生命是一场修行", "高敏者的自我救赎"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202605270646/49ca088a5005f63b80b7c476bf11f395/notes_pre_post/1040g3k031ugn3ecqii5049qsherkv5c78cjc18g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/69bb01eeed27745d7546f1a6541a2f91/notes_pre_post/1040g3k031ugn3ecqii5g49qsherkv5c7lcjkbs0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/215ca3f30b16054ad41887c9fd85c21d/notes_pre_post/1040g3k031ugn3ecqii6049qsherkv5c7ra4s4ho!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/cb9b1712c4eaf0c6ac8a9329c7b8d533/notes_pre_post/1040g3k031ugn3ecqii6g49qsherkv5c7kgb40fo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/ab796bd83b78c928de2880905b8ff8b4/notes_pre_post/1040g3k031ugndt8d2q0049qsherkv5c7m238fb0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/75d7c65176db29dee6956162471ae768/notes_pre_post/1040g3k031ugndt8d2q0g49qsherkv5c7c44das8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/c5332b6f843ab4b4bc886f24125dc802/notes_pre_post/1040g3k031ugndt8d2q1049qsherkv5c7heac6dg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/e39b731f83092f7b1dac48e06fc817b0/notes_pre_post/1040g3k031ugndt8d2q1g49qsherkv5c7nqf8rio!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/3263f827f7324a8746ec5cad32fe6daf/notes_pre_post/1040g3k031ugndt8d2q2049qsherkv5c77eu9108!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/04ff38f0e6d49336092d5083932f742f/notes_pre_post/1040g3k031ugndt8d2q2g49qsherkv5c7n8f0db8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/b0f519d3c295082f3328b369f9b9e731/notes_pre_post/1040g3k031ugndt8d2q3049qsherkv5c74oevupo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/887d64003ee176acb8881670e5b2743b/notes_pre_post/1040g3k031ugndt8d2q3g49qsherkv5c78r72320!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/1d8440e5c2bd51793ca43f0064c31905/notes_pre_post/1040g3k031ugndt8d2q4049qsherkv5c7brgd1b0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/d1bf4ea7413991294e185bdff2ea6de0/notes_pre_post/1040g3k031ugndt8d2q4g49qsherkv5c7md8rdr8!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "", "lat": 37.826294, "lng": -122.4996496, "geocoded": true, "geo_source": "google_neighborhood", "geo_precise": false, "neighborhood_canonical": "Marin Headlands, California, USA", "liked_count": 148, "collected_count": 85, "comment_count": 11, "posted_at": 1775233650000}, "e14": {"id": "e14", "name": "Point Reyes", "url": "https://www.xiaohongshu.com/explore/69c979cc0000000020038778", "quote": "「湾区周末 | 三刷Point Reyes小结」", "description": "灯塔、奶牛、Tule elk，三刷之后依然有新发现。", "neighborhood": "Marin County", "venue": "Point Reyes National Seashore", "time_window": null, "price": "免费", "themes": ["户外"], "thumbnail": "images/69c979cc0000000020038778.webp", "snippet": "", "full_text": "距离湾区两小时左右车程的Point Reyes，是徒步/摄影出片/吃生蚝的周末好去处。\n\t\np1. Point Reyes Secret Amphitheater/Crater\n徒步往返时间约3-4hr，需退潮在-0.5ft一下，轻度攀岩，短距离涉水。停车点位📍 (38.0262054 -122.8769091)\n\t\np2,3. Point Reyes Lighthouse\n建议日落时分去，一半是海一半是陆。\n\t\np4,5. Tomales Point Trailhead\n顺光背光都很出片的临海hiking trail，有机会看鹿\n\t\np6-9 餐厅/当天打捞的生蚝专卖点位\n📍 Tomales Bay Oyster Company\n批量购买现捞生蚝，价格实惠，十分新鲜，建议自备蚝刀开生蚝，自备保温箱。\n📍 The Marshall Store\n除了生蚝还能吃到clam chowder之类的汤品\n📍 Hog Island Oyster General Store\n非常好吃的生蚝餐厅！可以选择做法（生吃/烤熟）\n\t\n其他值得去的地方：\n📍Heidrun Meadery\n蜂蜜酒庄，适合秋天看红叶的时候去。蜂蜜酒口味没有很惊艳。花园还蛮漂亮的（并且此处拥有整个point reyes景区最好的卫生间条件）\n\t\n#湾区周末[话题]# #湾区生活[话题]# #湾区美食[话题]# #生蚝[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/69c979cc0000000020038778?xsec_token=ABEMVCZcjsR0o3VkRQtz3Vcxi-wu9WhDC5srILWqsCCc0%3D&xsec_source=", "hashtags": ["湾区周末", "湾区生活", "湾区美食", "生蚝"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202605280010/af176388e7b384c232cb86875a4094dd/notes_pre_post/1040g3k831uaddaf62i705o7i1hq091cib93akqg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605280010/ca6ae156a17099a5c26d305871157261/note_pre_post_uhdr/1040g3r031uadgrf42o005o7i1hq091cit0a3hro!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605280010/b5ce28bf5857ce1467515663f5ee02dc/note_pre_post_uhdr/1040g3r031uadgrf42o0g5o7i1hq091cieplkt48!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605280010/bd0249a477eae5d943136fc98b92c566/notes_pre_post/1040g3k831uaddaf62i7g5o7i1hq091cip5ae7f8!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605280010/82170e9c74bcdcaaf6e9da524d1ce4d5/notes_pre_post/1040g3k831uaddaf62i805o7i1hq091cijf14820!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605280010/0e50d0ccfa878754c4eb756e251f1cff/notes_pre_post/1040g3k831uaddaf62i8g5o7i1hq091ci7ekgdj8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605280010/46915bb10856082b98b638fd3e142ee6/notes_pre_post/1040g3k831uaddaf62i905o7i1hq091civ26cgl8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605280010/a0faf9623acf6f9b48e339fb3783c54e/notes_pre_post/1040g3k831uaddaf62i9g5o7i1hq091ci1vkbudo!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605280010/e71f69964366c164cc33c29cbf6bdb95/notes_pre_post/1040g3k831uaddaf62ia05o7i1hq091cir8m79kg!nd_prv_wgth_jpg_3"], "video_url": "", "ip_location": "", "lat": 38.083403, "lng": -122.7633036, "geocoded": true, "geo_source": "google_neighborhood", "geo_precise": false, "neighborhood_canonical": "Marin County, CA, USA", "liked_count": 352, "collected_count": 448, "comment_count": 24, "posted_at": 1774811596000}, "e15": {"id": "e15", "name": "Dawn Ranch", "url": "https://www.xiaohongshu.com/explore/699bd97b000000000903b8d7", "quote": "「🌲湾区周末逃离计划📍Dawn Ranch」", "description": "Russian River 边的红木林 cabin 度假村，适合不想开太远的逃离。", "neighborhood": "Guerneville", "venue": "Dawn Ranch, Guerneville", "time_window": "周末", "price": "$$$", "themes": ["户外", "宝藏地点"], "thumbnail": "images/699bd97b000000000903b8d7.webp", "snippet": "", "full_text": "在Russian River 附近的红木林边的 staycation，喜欢餐厅 The Lodge 的布置，收获不少设计元素。\n💡空间是modern farmhouse 风格：  沙丘色的墙面、原木大长桌、干花和绿植绕柱装饰，墙上有审美在线的画作，像小型 gallery；桌边还有充电插座，对远程办公人友好。\n🏡住：选了带客厅和火炉的 Grove Cottage，种草的是浴室那面碧绿色瓷砖墙，有森林感\n🍽️食:  The lodge 的早餐和晚餐都很出彩。 晚上的是set menu, 可以按自己的胃口选。附上图片。自己对吃没那么讲究，所以觉得好吃\n⛰️景: 开车7分钟就可以到一个州立公园Armstrong Redwood State Park. 可以选择1mile的徒步路线也可以走强度高的登山线。在红木林里呼吸氧气，detox\n#湾区周末[话题]# #湾区生活[话题]# #湾区周边[话题]# #美学设计[话题]# #软装设计[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/699bd97b000000000903b8d7?xsec_token=ABz5c1AyW4oKFJwXw7xAp3XcTsxlgPb1oWEAyaSofoGv0%3D&xsec_source=", "hashtags": ["湾区周末", "湾区生活", "湾区周边", "美学设计", "软装设计"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202605261403/0a40071b6c5bc1e0f55fb49029c2ab1b/notes_pre_post/1040g3k831stsdb9kl6705ntoist09ec65ddc43o!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/2f36f0341fb08ac9ab5322f3080183f9/notes_pre_post/1040g3k831stsdb9kl67g5ntoist09ec68n7dk28!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/ba487cce755e87f988ddef652afe610a/notes_pre_post/1040g3k831stsdb9kl6805ntoist09ec6suaskp8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/0e0985d25eac49ca3581ab6bd3de2b10/note_pre_post_uhdr/1040g3r031stse2t8la005ntoist09ec62tp3qeg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/7e09702f72935f8decd53b17b5b171d8/note_pre_post_uhdr/1040g3r031stse2t8la0g5ntoist09ec6mrjvfco!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/2459efd31c728b5ccaf878c5e97aed07/note_pre_post_uhdr/1040g3r031stse2t8la1g5ntoist09ec62d4aus0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/f0b063127895dea7efabde3851400b21/note_pre_post_uhdr/1040g3r031stse2t8la105ntoist09ec67vn6vbg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/912d9feda98d8b3ff1be27544c2f364e/note_pre_post_uhdr/1040g3r031stse2t8la205ntoist09ec67s53bd8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/ece404c07f3f0e373ffdbe9d53b1eb89/note_pre_post_uhdr/1040g3r031stse2t8la2g5ntoist09ec6lv9r1co!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/43d8290f185c1d3c0a852b1f8a63076b/notes_pre_post/1040g3k831stsdb9kl68g5ntoist09ec665u5f5o!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/bb51898bc7f7fe3fb34b1c0c4e742054/note_pre_post_uhdr/1040g3r031stse2t8la305ntoist09ec61hdhs48!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/029bd0c1878e0f7977ddb9e9e81afcb2/note_pre_post_uhdr/1040g3r031stse2t8la3g5ntoist09ec67hi9dqo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/e6a04f5cec009b83434f90d008eff818/notes_pre_post/1040g3k831stsdb9kl6905ntoist09ec6flbcdbo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/66661a7aca6ad75de3bd052050bc13c1/note_pre_post_uhdr/1040g3r031stse2t8la405ntoist09ec66ssr4fo!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "", "lat": 38.5014421, "lng": -123.0027558, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "16467 CA-116, Guerneville, CA 95446, USA", "liked_count": 212, "collected_count": 410, "comment_count": 11, "posted_at": 1771821435000}, "e16": {"id": "e16", "name": "老钱小镇半日游", "url": "https://www.xiaohongshu.com/explore/6a25e8b3000000000e038400", "quote": "「湾区松弛感老钱小镇半日游」", "description": "半岛上慢悠悠的老钱街区，逛书店、咖啡馆、独立小店刚刚好。", "neighborhood": "Woodside", "venue": "Woodside", "time_window": null, "price": "$$", "themes": ["户外", "宝藏地点"], "thumbnail": "images/6a25e8b3000000000e038400.webp", "snippet": "", "full_text": "趁着好天气来收藏了很久的marin county mart\n在rustic bakery吃了brunch 天气很好 特别好停车 户外风吹着很舒服也不冷 周围还有吃生蚝的店看起来很新鲜\n大部分的店铺属于集合店 卖衣服 卖首饰 卖家居用品\n在Hudson Grace买到了一个很简约的碗 打算拿来做酸奶碗 店里的阿姨人也很好 专门去库房帮我拿了一个新的\n在Heroshop（一家买手店，有the row，khaite, toteme）买到了一个白色夹克 可以休闲也可以上班穿 乐之！！\n剩下的店没有太买别的 但是逛的人特别开心\n第一次吃Souvla的这个酸奶 要了樱桃酱的mini size，第一口梦回国内的蒙牛酸奶冰棍\n如果周末没别的事就来这里逛吧 很舒服\n\t\n#留学生探店[话题]# #留学plog[话题]# #marin[话题]# #湾区生活[话题]# #湾区周末[话题]# #我的留学生活[话题]# #买手店[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a25e8b3000000000e038400?xsec_token=AB3XfwvGJ53PeT7cKYtMrKmLO0QdrXYxfeexmudzZuDkQ%3D&xsec_source=", "hashtags": ["留学生探店", "留学plog", "marin", "湾区生活", "湾区周末", "我的留学生活", "买手店"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606122307/3d405a878020093d338becdf4d7c7ab7/oss-sg/notes_pre_post/1040g3mo3214mjieq7i005nc6lgfg98ca8backjg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/e5bb6f723a7f699ffba23dc4d0d3e1f0/oss-sg/notes_pre_post/1040g3mo3214mjieq7i0g5nc6lgfg98cakot595o!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/430cff5825a401289cb77ac907e2b902/oss-sg/notes_pre_post/1040g3mo3214mjieq7i105nc6lgfg98cadhiqao8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/7c39ca83b2a7bea2fec6190a8d21aa02/oss-sg/notes_pre_post/1040g3mo3214mjieq7i1g5nc6lgfg98caf4lkj9g!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/5fbc502771fb5aef9da9e3b68a68f4b1/oss-sg/notes_pre_post/1040g3mo3214mjieq7i205nc6lgfg98caripik0g!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/9019c44b82c9dc7c03eef8887e930070/oss-sg/notes_pre_post/1040g3mo3214mjieq7i2g5nc6lgfg98cavrn7620!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/9bc4881237646ddec432edaf8ceb8f73/oss-sg/notes_pre_post/1040g3mo3214mjieq7i305nc6lgfg98ca5ledl0g!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/09d661271054fb0a19b9015bb97f23f6/oss-sg/notes_pre_post/1040g3mo3214mjieq7i3g5nc6lgfg98ca8nacekg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/ea908a7043e2de221a4a6001c8e35f40/oss-sg/notes_pre_post/1040g3mo3214mjieq7i405nc6lgfg98caq3aslng!nd_prv_wlteh_jpg_3?src=A"], "video_url": "", "ip_location": "美国", "lat": 37.4299388, "lng": -122.2538557, "geocoded": true, "geo_source": "google_neighborhood", "geo_precise": false, "neighborhood_canonical": "Woodside, CA, USA", "liked_count": 98, "collected_count": 97, "comment_count": 4, "posted_at": 1780869299000}, "e17": {"id": "e17", "name": "Carolands 城堡", "url": "https://www.xiaohongshu.com/explore/68f46f370000000003013ebd", "quote": "「湾区最“老钱”的隐秘城堡｜Carolands Château」", "description": "Hillsborough 山上的法式古堡，需预约导览，是真正小众的下午。", "neighborhood": "Hillsborough", "venue": "Carolands Chateau", "time_window": "需预约", "price": "$$", "themes": ["文化", "宝藏地点"], "thumbnail": "images/68f46f370000000003013ebd.webp", "snippet": "", "full_text": "在Hillsborough的山丘上，有一栋很多人从未听过的城堡——Carolands Château。\n\t\n只有每周三对公众开放一次private tour，全程是有导游带领，每个tour十个人左右。因为想参观的人还是挺多的，这个tour要通过抽签报名，我抽了整整两个月才被幸运选到…\n\t\n城堡建于1912年，由芝加哥铁路富豪之女Harriet Pullman Carolan委托法国建筑大师Ernest Sanson设计，建筑是纯正的Beaux-Arts美术学院派风格。那种对称、比例、材质的讲究——从外观就能看出来是那种“有教养的奢华”。\n\t\n但最惊艳我的不是外观，而是室内细节——\n里面有一间特别大的图书馆。它的栏杆、墙壁上的雕纹，全是请法国几代传承的手工艺人在法国当地雕刻好，再整块运来加州拼装。甚至有两间屋子，连墙壁和地板都是从法国其他mansion原屋切割打包运来的。\n大堂的电梯、厨房运输食物上下的滑轨，当导游给我们演示它们如何运作时，真的是被一百多年前的工艺惊艳到了。那个丝滑、无声的质感，真的找不到语言去形容。\n\t\n在湾区实用简约的“爱可乐”房子看多了，再来看这种精致到骨子里的老钱审美，简直身心都受到了净化[笑哭R]\n\t\nTour一共是两个半小时，大概十人左右。室内全程禁止拍照。这种不会分心、不被打扰地沉侵式解说体验，让我可以甚至觉得自己就是生活在这栋城堡里的女主人，白日梦做的飞起[害羞R]\n\t\n做research的时候看到外网说这里风水不好、发生过好几件奇怪的事情，还挺神奇的。\n\t\nCarolands Chateau不如Filoli那样有壮观的大花园，也不像Hearst Castle那么雄伟，但我更喜欢它offer的这种更私密、沉浸的体验。\n\t\n📍 Hillsborough, California\n🎟️ 免费 官网抽签 | carolands.org\n\t\n#湾区小众景点[话题]# #法式城堡[话题]# #建筑美学[话题]# #室内设计[话题]# #加州旅行[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/68f46f370000000003013ebd?xsec_token=ABHo-5h3pzJsgK_Hp7daA6h-o-oiQYUsqL88GEcFfxZus%3D&xsec_source=", "hashtags": ["湾区小众景点", "法式城堡", "建筑美学", "室内设计", "加州旅行"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606122307/6434173a102c0f168e1f1d12aeed4a89/1040g2sg31nqbnqe1069049ussei99k2c9uq930o!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/2d74d460aa914bd78b4abf21bcbd328b/1040g2sg31nqbnqe1067049ussei99k2cfpb59d0!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/939511258c7922b0022a557cb443640e/1040g2sg31nqbnqe1068049ussei99k2c9qv612o!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/4874c6cd18e15c880ad9289b99a07022/1040g2sg31nqbnqe1068g49ussei99k2co9c4070!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/c5fc0022dbe896b18d72bc60a8783b90/1040g2sg31nqbnqe1067g49ussei99k2ccru30a8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/43e97b6ca2d06b60a18ab1934bdb40a8/1040g2sg31nqbnqe106a049ussei99k2cb3ens4o!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/e8d1ff553e4f826f3b61e5c91e99e9bc/notes_uhdr/1040g3qo31nqcpv9g067049ussei99k2cq1r3ie0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/2f98d548deaf60434d65fc825606bd94/1040g2sg31nqbnqe1069g49ussei99k2ckclc8eo!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/1cb414cd70f813d576ef2134ddb29b02/notes_uhdr/1040g3qo31nqcpv9g067g49ussei99k2crplj0uo!nd_prv_wlteh_jpg_3?src=A"], "video_url": "", "ip_location": "", "lat": 37.5553176, "lng": -122.3718564, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "565 Remillard Dr, Hillsborough, CA 94010, USA", "liked_count": 568, "collected_count": 719, "comment_count": 37, "posted_at": 1760849719000}, "e18": {"id": "e18", "name": "Jackson Square", "url": "https://www.xiaohongshu.com/explore/69890c6b000000001b016527", "quote": "「湾区周末｜Jackson Square是sf最美街区吧」", "description": "砖墙、古董店、画廊，旧金山最容易被忽视的好看街区。", "neighborhood": "Jackson Square", "venue": "Jackson Square Historic District", "time_window": null, "price": "免费", "themes": ["文化", "宝藏地点"], "thumbnail": "images/69890c6b000000001b016527.webp", "snippet": "", "full_text": "jackson square这边可能是我觉得三番最美丽的街区了，有商店、咖啡店、面包店，很适合慢悠悠地闲逛。\n\t\n我们来城里吃晚饭的，不过下午一两点就到了，轻松消磨了一个下午。\n\t\n📖 William Stout Architectural Books这家建筑书店非常推荐！有超全的建筑和设计类书籍，可以逛很久。\n\t\n🥐 Maison Nico 外面的粉色桌椅有种欧洲的感觉，pastries我倒是没觉得太惊艳。但有边上verjus的小哥几个有过来买，法式厨子间的一些惺惺相惜！\n\t\n👗 女生逛街的话有Isabel Marant, Ralph Lauren, Anne Bing可以看看。\n\t\n🍞 然后Toast不要错过！不是面包店啦，是家不久前从伦敦开过来的日式服装店。这次是专门去看这家的，有蛮多件心动的衣服的。\n\t\n👕 Paul Smith 店里面的装修很酷。\n\t\n哦对了，Hotaling那条路可以拍到后面的Transamerica金字塔。\n\t\n再走几个block可以顺便到chinatown再溜达溜达😌\n\t\n#湾区生活[话题]# #湾区周末[话题]# #湾区[话题]#\n#旧金山[话题]# #sanfrancisco[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/69890c6b000000001b016527?xsec_token=AB16WQ9xT3YSvTsey6cbecu5qFp29tQqs6fm9BURAufYs%3D&xsec_source=", "hashtags": ["湾区生活", "湾区周末", "湾区", "旧金山", "sanfrancisco"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606120152/3724ac1f9eaaef941e195d230b75c840/1040g2sg31sbfffqcm27g4atd16ijard0fqe56b0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/5a0ddc55ba38a130c2ee282388b4d541/notes_uhdr/1040g3qg31sbgsj76lm004atd16ijard0735ipcg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/0dff4194b5b75dd45a7c5872f6e2e6b9/1040g2sg31sbgvoob5m7g4atd16ijard0l018330!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/3d513e61ea33a94fa1853240bef5c2db/notes_uhdr/1040g3qg31sbgsj76lm0g4atd16ijard0hj750io!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/077ddbc19752b5cb314bfdfe509b6671/1040g2sg31sbfffqcm2704atd16ijard0f0f7vc8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/c9d3db6400c708bd26e1b54336431848/notes_uhdr/1040g3qg31sbgsj76lm104atd16ijard0pa2cabo!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/b4533e399b4c955c56a232b35526c020/1040g2sg31sbgvoob5m804atd16ijard019d24u0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/414c8a4b8e10ef36598676943c70ad7a/1040g2sg31sbgvoob5m904atd16ijard06g3lf3g!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/ff710229b7992363c6dc0a1820df8fb1/notes_pre_post/1040g3k831sigrpdmls704atd16ijard00hifu80!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/fe3b7a9df6a761d765d4e0a2220746ce/notes_uhdr/1040g3qg31sbh09clm2004atd16ijard0792ddc0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/fe0d83cfff2792cfcab538634d11f713/1040g2sg31sbgvoob5m9g4atd16ijard09dfr370!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/3e95c01eadaaccebb4a27cb5f0f75fc6/notes_uhdr/1040g3qg31sbh09clm20g4atd16ijard09tvep38!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/6136f8705f63c1604bb5a5a7cc6fcd05/1040g2sg31sbgvoob5m8g4atd16ijard0s6aj7k0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/255b227b4260f18e6dd58262b73aff4c/1040g2sg31sbgvoob5ma04atd16ijard0vugbsco!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/3129883a24e2613c88ab0d765892cc4b/1040g2sg31sbgvoob5m704atd16ijard0oljsk48!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/63c493561adce98720f9b6a3885946d1/1040g2sg31sbgvoob5mbg4atd16ijard0fd95788!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/6bc9bf5939ee8ecb111be2e9c1c46ab7/1040g2sg31sbgvoob5mb04atd16ijard05nvutpg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/4b3d6ad35bf9adac74e17d46fc396ba2/1040g2sg31sbgvoob5mag4atd16ijard0t6tgn9g!nd_prv_wlteh_jpg_3?src=A"], "video_url": "", "ip_location": "", "lat": 37.7970411, "lng": -122.4031893, "geocoded": true, "geo_source": "google_neighborhood", "geo_precise": false, "neighborhood_canonical": "Jackson Square, San Francisco, CA, USA", "liked_count": 212, "collected_count": 223, "comment_count": 5, "posted_at": 1770589291000}, "e19": {"id": "e19", "name": "Dogpatch", "url": "https://www.xiaohongshu.com/explore/685b21fd000000002203f896", "quote": "「三番Dogpatch街区好嗲❗️烘焙绿植咖啡逛不够」", "description": "工业仓库改造街区，烘焙、绿植、咖啡店一条街，适合慢慢晃。", "neighborhood": "Dogpatch", "venue": "Dogpatch, San Francisco", "time_window": null, "price": "$$", "themes": ["美食", "宝藏地点"], "thumbnail": "images/685b21fd000000002203f896.webp", "snippet": "", "full_text": "周末去big sur玩，在湾区闪现经停，男友的collaborator约在dogpatch街区碰头。我点开google map就发现好多心动的小店，果断要求分头行动，我要好好探索一下哈哈！\n果然Dogpatch没有让我失望，是个好嗲好文艺的小街区，半天逛不够。感觉天气好的周末来买个pastry坐在外头吃，再随便找家咖啡馆看会儿书，去绿植店奶酪铺淘一淘中意的小物件，就是理想周末日常。整理一下我很喜欢的四家小店！\n-\n🥐Neighbor Bakehouse\n在湾区挺有名气的烘焙店，主打馅料丰富口味创新，融合了不少亚洲元素。\n我更推荐咸口，cha siu croissant有种吃酥皮叉烧包的感觉，常见的ham&cheese也很惊艳，外围有一圈everything bagel那样种子壳，咬下去特别香特别有口感，\n甜味的招牌是ube，巧克力榛子，ginger pull apart，感觉略有点heavy。不过喜欢b patisserie和Dominique ansel的肯定也会喜欢这里。\n还看到sourdough和咖啡也不错！\n-\n🌵Revel\n和植物有关的一切集成店！从整棵盆景多肉，到一整面花墙可以自己搭配花束，再到当地人手工做的花瓶器皿，各类园艺工具，以及植物精油香氛和蜡烛，应有尽有。\n说实话有点点overpriced，但在里面兜兜真的很净化眼睛洗涤身心，vibe很舒服，剁手也情有可原！\n-\n🧀la fromagerie cheese shop\n非常非常非常法国的一家店，大部分奶酪都是法国进口的，店员是个很可爱的法国小姐姐，会很认真根据你的偏好做推荐，在我用法语和她打招呼后就朝我狂飙法语😂店内还有不少可以佐奶酪的特色果酱，cracker，葡萄酒，选品都很有格调。也可以吃到用店内奶酪新鲜制作的特色三明治。\n-\n☕️Coffee Shop｜Bakery&micro roastery\n凭眼缘进的一个独立咖啡店，阳光下一栋漂亮的白房子，内外座位都不少，坐在室内可以透过窗子看到对街的紫藤花。\n他们家的烘焙看起来也很眼馋，有一款草莓味噌酥皮看起来超棒。眼大肚小的我点了杯热茶和几袋豆子也很满意。\n-\n#北美生活[话题]# #湾区[话题]# #三番[话题]# #湾区美食[话题]# #旧金山[话题]# #旧金山美食[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/685b21fd000000002203f896?xsec_token=ABZqdWJH8Vz0515WplPZ075ELoiv-wVUEyqqCvu1e1O-8%3D&xsec_source=", "hashtags": ["北美生活", "湾区", "三番", "湾区美食", "旧金山", "旧金山美食"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202606070120/207b1cc30a2e80b15bc91d4583fae0d5/1040g00831j4kkv4nhg405n11p3jh8shi79v410g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/1d77470fd0e3c45c58c3d808a086963d/1040g00831j4kkv4nhg4g5n11p3jh8shi0vjmajg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/d93ccca09b2a0536498b6fafeb89959f/1040g00831j4kkv4nhg505n11p3jh8shidkismcg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/078d7ca3816aec7ba531b72504ce601a/1040g00831j4kkv4nhg5g5n11p3jh8shi4r37jj8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/e50b1b3a25002170c26b62a38a922415/1040g00831j4kkv4nhg605n11p3jh8shiphh5cv8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/2b1d7122a84f5d9ccc3ff2e1f3a44268/1040g00831j4kkv4nhg6g5n11p3jh8shirbvidao!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/a5f21eeeb92ad5cf6e4e8296d2f4922e/1040g2sg31j4kur2qhg7048m11836mcukh92gmd8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/c5df7a14de1cbfa45eb8ef1d2931e093/1040g2sg31j4kur2qhg7g48m11836mcukc0s4tig!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/54ef148e932a0dd8132897b0c3d33192/1040g2sg31j4kur2qhg8048m11836mcukhdtpjho!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/1b405c80cc8b5c0c3ab1ed666f4fed84/1040g2sg31j4kur2qhg8g48m11836mcukfo7gojg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/c61e37f6ca9f0888f80ee93220cd4d44/1040g2sg31j4kur2qhg9048m11836mcukdqoimr0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/b99437775d887df9a3d78f1d516c7019/1040g2sg31j4kur2qhg9g48m11836mcuklltvubg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/c92df739b0b1c26ed4e5ce4d43f011ae/1040g2sg31j4kur2qhga048m11836mcuk1c8am9o!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/ee64ed4ed463ee1716b82182b09d451a/1040g2sg31j4kur2qhgag48m11836mcukuk3k4mg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202606070120/bc080dcbf679a2c7c599934fda40802c/1040g2sg31j4kur2qhgb048m11836mcuk5a3mmfo!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "", "lat": 37.76049829999999, "lng": -122.3886835, "geocoded": true, "geo_source": "google_neighborhood", "geo_precise": false, "neighborhood_canonical": "Dogpatch, San Francisco, CA 94107, USA", "liked_count": 114, "collected_count": 114, "posted_at": 1750802941000}, "e20": {"id": "e20", "name": "The Interval", "url": "https://www.xiaohongshu.com/explore/69757999000000000a03e870", "quote": "「旧金山必访｜The Interval at Long Now」", "description": "Long Now Foundation 的酒吧兼图书馆，思辨味浓厚的一杯。", "neighborhood": "Fort Mason", "venue": "The Interval at Long Now", "time_window": null, "price": "$$", "themes": ["美食", "宝藏地点"], "thumbnail": "images/69757999000000000a03e870.webp", "snippet": "", "full_text": "藏身旧金山梅森堡中心的 The Interval at Long Now，是恒今基金会的总部，也是一处以 “长期主义” 为核心的复合文化空间。它跳出传统书店的框架，将藏书、展览、饮品融为一体，主打与文明存续、重建相关的书籍，涵盖历史、科技、人类学等领域，书架藏书定期轮换，每一次到访都有新发现。\n\t\n空间里的万年钟机械原型、动态艺术装置，诉说着对时间的探索；时间主题饮品与定制烈酒，让阅读与品鉴有了新联结；落地窗框住的金门大桥与恶魔岛风光，更让人文与自然在此交融。这里不止是读书的地方，更是思考文明与时间的精神据点。\n\t\n📍地址：美国加利福尼亚州旧金山市滨海大道 2 号梅森堡中心 A 栋 Center Building A, 2 Marina Blvd, San Francisco, CA 94123, United States\n\t\n🕒营业时间：周一 17:00-22:00；周二至周五 10:00-23:00；周六 17:00-23:00；周日 15:00-22:00\n\t\n逛旧金山时，不妨来这里，在书香与光影里，展开一场关于时间的深度对话\n.\n.\n.\n#值得待上一整天的书店[话题]# #治愈系书店[话题]# #栖纸艺术书店[话题]# #竹川书店[话题]##有书有咖有猫[话题]# #书籍推荐[话题]# #我的私人书单[话题]# #旅行[话题]##就爱逛书店[话题]##旧金山[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/69757999000000000a03e870?xsec_token=AB0VfQoVH93hzZSKrVyoX2uK2gQ-ozDKsfa6l_ZNyHwbs%3D&xsec_source=", "hashtags": ["值得待上一整天的书店", "治愈系书店", "栖纸艺术书店", "竹川书店", "有书有咖有猫", "书籍推荐", "我的私人书单", "旅行", "就爱逛书店", "旧金山"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202605261403/faed944d31e9f52d71ca30d421f9e866/spectrum/1040g0k031rod2sk720405p4kvm8482dls74ufro!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/3349f0f7ab474824e21c185abdf0a998/spectrum/1040g0k031rod2sk720505p4kvm8482dlekef7g8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/aa5e29e4bcce40a70dc21cb0789af2b9/spectrum/1040g0k031rod2sk720105p4kvm8482dle4ergmo!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/420527bee19aa05fded570e0d60b7f0d/spectrum/1040g0k031rod2sk7201g5p4kvm8482dl9qhg600!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/2e225b1520185409226e19a277efabd6/spectrum/1040g0k031rod2sk7205g5p4kvm8482dluue2trg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/3bc4e57644c5877fd7468b6939af02a9/spectrum/1040g0k031rod2sk7206g5p4kvm8482dl86ibe6g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/9b32316cb75b8cf4cfe501db83a90073/spectrum/1040g0k031rod2sk720005p4kvm8482dlmuc6708!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/5ff889e84812ee75dadf13f3ae867532/spectrum/1040g0k031rod2sk7200g5p4kvm8482dl8009r00!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/187b3f4a9985f902de7676f4cefb52f6/spectrum/1040g0k031rod2sk720205p4kvm8482dlbojihp0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/081bdc056b2979413e3d3112dae5bf35/spectrum/1040g0k031rod2sk7202g5p4kvm8482dl8h67pro!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/05649448615300bd1c1c516cd9159124/spectrum/1040g0k031rod2sk7203g5p4kvm8482dlt4tp20g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261403/6b4d45f15b3601bf77ef6430d74a76f6/spectrum/1040g0k031rod2sk7204g5p4kvm8482dlss66dk8!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "", "lat": 37.8066031, "lng": -122.4321667, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "Center Building A, 2 Marina Blvd, San Francisco, CA 94123, USA", "liked_count": 144, "collected_count": 144, "comment_count": 1, "posted_at": 1769306521000}, "e21": {"id": "e21", "name": "$98 tasting menu", "url": "https://www.xiaohongshu.com/explore/6a002f4a0000000008031459", "quote": "「旧金山 $98 tasting menu 无敌好吃 🤤」", "description": "性价比惊人的 tasting menu，预订位子不太难。", "neighborhood": "San Francisco", "venue": null, "time_window": null, "price": "$$$", "themes": ["美食"], "thumbnail": "images/6a002f4a0000000008031459.webp", "snippet": "", "full_text": "这家真的属于我在旧金山会想反复回来的店。食材都很新鲜，味道也很干净。超好吃，而且会经常想念。\n\t\n之前第一次来 Octavia 点 a la carte 就已经觉得很好吃，这次终于来试 chef’s tasting menu 了。$98 一个人，在旧金山算非常划算的价钱了。\n\t\n这家的 sourdough 面包真的太好吃了。喜欢的话可以单独买一整个面包带回家。最好白天来买或者提前订。\n\t\nSweet potato mochi 好吃极了。很特别，口感QQ的， 是我第一次吃到这种组合。Porcini mushroom pasta 味道浓郁，意面本身也做得很好。\nBlack cod 很嫩，下面那个萝卜和土豆居然也超好吃。鸭子也很美味，就是配的酱对我来说稍微偏咸一点，不过少沾一点就没问题。\n\t\n最后两个甜品我都喜欢。Oat madeleine 配冰淇淋和烤草莓，奶香味特别舒服。Chocolate sabayon tart 完全不是那种齁甜路线，配芝麻冰淇淋和 miso caramel 平衡得很好。\n\t\n写这篇的时候又开始馋了，不停的在流口水。[色色R]\n\t\n#旧金山美食[话题]# #旧金山探店[话题]# #湾区美食[话题]# #湾区生活[话题]# #SF美食[话题]# #加州生活[话题]# #美国生活[话题]# #漂亮饭[话题]# #周末吃啥[话题]# #华裔[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a002f4a0000000008031459?xsec_token=ABcG9_2KqHZN6Y4K5sXjReRlcj6gsEWBzIZ9FbHNLyRAQ%3D&xsec_source=", "hashtags": ["旧金山美食", "旧金山探店", "湾区美食", "湾区生活", "SF美食", "加州生活", "美国生活", "漂亮饭", "周末吃啥", "华裔"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202605262350/44443fa36b5c6c3fc1c9666c6212bb05/notes_pre_post/1040g3k031vvrbr1h2q105p13bntkc1rjjftsek0!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605262350/c2c9f301d73ad39a9d3d45f749fff12d/notes_pre_post/1040g3k031vvrbr1h2q2g5p13bntkc1rj5dfvbr0!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605262350/ff04282bb7fea2860137dad942bdeaef/notes_pre_post/1040g3k031vvrbr1h2q205p13bntkc1rjoko7b18!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605262350/2789bbc226633bcd10ad81a5ea34a594/notes_pre_post/1040g3k031vvrbr1h2q005p13bntkc1rje7fuomo!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605262350/bc152c862fd2df9bb45c5c5a2406667c/notes_pre_post/1040g3k031vvrbr1h2q305p13bntkc1rjtnb9ss0!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605262350/882506e65ccb9ea11e56b366f5d9d7cf/notes_pre_post/1040g3k031vvrbr1h2q0g5p13bntkc1rjer7naag!nd_prv_wgth_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605262350/fff288d73199a8523d03dcf0672d39a1/notes_pre_post/1040g3k031vvrbr1h2q1g5p13bntkc1rjsfdsj38!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "美国", "lat": 37.7749295, "lng": -122.4194155, "geocoded": true, "geo_source": "google_neighborhood", "geo_precise": false, "neighborhood_canonical": "San Francisco, CA, USA", "liked_count": 29, "collected_count": 34, "posted_at": 1778808613000}, "e22": {"id": "e22", "name": "Soralla", "url": "https://www.xiaohongshu.com/explore/69ae468f000000001a024e67", "quote": "「🍝Soralla｜可以用惊为天人来形容这种美味！」", "description": "近期被反复推荐的意面店，分量克制但味道惊人。", "neighborhood": "San Francisco", "venue": "Soralla", "time_window": null, "price": "$$", "themes": ["美食"], "thumbnail": "images/69ae468f000000001a024e67.webp", "snippet": "", "full_text": "周末和来三番旅行的朋友约饭！找了很久，最后决定去这家相对小众但小红书好评很多的意大利小酒馆：Sorella，毕竟朋友聚会最怕餐厅踩雷😂\n查的时候发现，这家其实是米其林团队开的副牌餐厅，背后是旧金山老牌二星餐厅Acquerello，所以对味道还是有点期待值的～\n简单评价 ：两道前菜就直接给我和朋友吃到惊为天人！真的是感叹太太太好吃了！\n环境的话就是现代意式小酒馆风格，有长吧台和温暖的开放式厨房，暖色灯光还是很适合约会和小聚的。\n前菜部分：\n🐙：Stuffed Squid，这道是小鱿鱼里填充了扇贝和虾，外面的小章鱼非常q弹，里面的部分超级鲜美，直接给我们吃的满足了。\n🐮： Rossotti Ranch 生牛肉塔塔，手工切成的生牛肉，肉质非常嫩滑，带着自然的鲜甜。上面搭配松露蒜香蛋黄酱（truffle aioli），入口有淡淡松露香气，风味非常高级。最后上面点缀24个月熟成帕玛森奶酪，咸香浓郁，整道菜的味道精致又有层次。\n其他部分我们还点了三款意面和一份牛排。\n🐚SPAGHETTI ALLA CHITARRA\n这道就是经典的番茄酱汁底，配上新鲜的蛤蜊，酸甜开胃。\n🐮DRUNKEN MAFALDINE\n整个餐厅的招牌，整个酱汁浓郁又层次丰富，牛肉用红酒慢慢熬煮，再搭配奶酪。酱汁会带着一点酒香和微微的醇厚感。这道菜会有点厚重的奶感，我不是很爱，但朋友却觉得超级好吃。\n🦆POTATO GNOCCHI\n是用土豆泥、面粉和鸡蛋制作的小小的面团，口感比普通意面更加柔软，入口蓬松细腻。搭配鸭肉炖的酱汁，整体口感非常顺滑。\n🥩牛排中规中矩，喜欢的家人们也可以尝试。\n两道前菜直接让我们惊呼不愧是米其林的班子，后面的意面直接让我感觉到口味的多样性，如果是来旧金山旅行或者在湾区找约会餐厅，这家真的值得收藏。建议预约噢！～\n\t\n#旧金山美食[话题]#\n#旧金山探店[话题]#\n#湾区美食[话题]#\n#湾区餐厅推荐[话题]#\n#旧金山约会餐厅[话题]#\n#旧金山旅行攻略[话题]#\n#湾区探店[话题]#\n#SanFranciscoFood[话题]#\n#意大利餐厅推荐[话题]#\n#三番美食[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/69ae468f000000001a024e67?xsec_token=AB7rGmRXRZQ2vGZuuJLGTHC5v7hSpLr4Edz6OBO7kYgao%3D&xsec_source=", "hashtags": ["旧金山美食", "旧金山探店", "湾区美食", "湾区餐厅推荐", "旧金山约会餐厅", "旧金山旅行攻略", "湾区探店", "SanFranciscoFood", "意大利餐厅推荐", "三番美食"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202605261404/ca15e2af592a5191a45691417b6af5d9/notes_pre_post/1040g3k831tfs7v5a5sd05nq1a9j0bkbh7aedep0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261404/c4fd5fa4e1275e215603c1f5d87f904e/notes_pre_post/1040g3k831tfs7v5a5sdg5nq1a9j0bkbhp3e7fj0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261404/265b902d6443f1f3f22fc955f9521649/notes_pre_post/1040g3k031tfs898klk105nq1a9j0bkbhev8n0ao!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261404/48bb6825fcc5dd9fe1983b03cc3433aa/notes_pre_post/1040g3k031tfs898k5k005nq1a9j0bkbhrc11fc0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261404/c5591a691f5239dd926476f5010156a3/notes_pre_post/1040g3k031tfs898klk1g5nq1a9j0bkbhmpjgli8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261404/f51d2fd74aeaca3b859b0778280d8cd5/notes_pre_post/1040g3k031tfs898klk005nq1a9j0bkbhs71r358!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261404/4ef5b71e8cc883c63ff1a35df2cbddc3/note_pre_post_uhdr/1040g3r831tfqqqg268r05nq1a9j0bkbhj2uf350!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261404/8b4eadf9fefb81f726fd22757134b7b6/note_pre_post_uhdr/1040g3r831tfs87q85k705nq1a9j0bkbht1fj710!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261404/09bed9bc5716a1cfa424a28470ab7164/notes_pre_post/1040g3k031tfs898klk0g5nq1a9j0bkbhdav3ag8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261404/bac24fa443575ba7516da37a45739137/note_pre_post_uhdr/1040g3r831tfqqqg268qg5nq1a9j0bkbhn1i1ck0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605261404/a908690205d14798a48258238e1fefb9/note_pre_post_uhdr/1040g3r831tfqqqg268rg5nq1a9j0bkbheekq0jg!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "", "lat": 37.7749295, "lng": -122.4194155, "geocoded": true, "geo_source": "google_neighborhood", "geo_precise": false, "neighborhood_canonical": "San Francisco, CA, USA", "liked_count": 386, "collected_count": 592, "comment_count": 6, "posted_at": 1773029007000}, "e23": {"id": "e23", "name": "新晋排队店", "url": "https://www.xiaohongshu.com/explore/6a1381620000000035039d0e", "quote": "「湾区新晋排队活动🥄」", "description": "最近湾区最火的排队甜品店，开门前半小时就开始有人。", "neighborhood": null, "venue": null, "time_window": null, "price": "$", "themes": ["美食"], "thumbnail": "images/6a1381620000000035039d0e.webp", "snippet": "", "full_text": "值不值得大家自己衡量吧～反正我吃下来给个“人上人”算是目前湾区蕞正儿八紧的糖水铺(rather than奶茶店)，和国内一个味儿😋强推桃胶和木薯系列[棒R] 📍麦记牛奶公司Mountain View #湾区[话题]# #湾区生活[话题]# #湾区糖水[话题]# #湾区甜品[话题]# #湾区奶茶[话题]# #湾区糖水店[话题]# #麦记牛奶公司[话题]# #湾区麦记[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a1381620000000035039d0e?xsec_token=ABjfJF9CJdGIdkinI9twZUqtgQwvTWlqOOa6BdXbSs_Vg%3D&xsec_source=", "hashtags": ["湾区", "湾区生活", "湾区糖水", "湾区甜品", "湾区奶茶", "湾区糖水店", "麦记牛奶公司", "湾区麦记"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202605261403/e412351aa92603243e8a16b1b46bcf5e/1040g008320infjrf6o0041aop7mjnn03u74o548!nd_prv_wlteh_jpg_3"], "video_url": "http://sns-video-zl.xhscdn.com/stream/79/110/258/01ea137f2213428d4f0370019e5c32c339_258.mp4?sign=3ffb719b1cf7b0c8884db90033dd94e5&t=6a19d4fe", "ip_location": "美国", "lat": null, "lng": null, "geocoded": false, "geo_source": "none", "geo_precise": false, "liked_count": 80, "collected_count": 28, "comment_count": 26, "posted_at": 1779663202000}, "e24": {"id": "e24", "name": "贵州烧椒鸡", "url": "https://www.xiaohongshu.com/explore/69fe7b4700000000380236bc", "quote": "「湾区｜开车一小时也要去吃的贵州烧椒鸡！好吃」", "description": "开一小时也甘愿的贵州小馆，烧椒鸡是必点。", "neighborhood": null, "venue": null, "time_window": null, "price": "$$", "themes": ["美食"], "thumbnail": "images/69fe7b4700000000380236bc.webp", "snippet": "", "full_text": "Miss Shang之前开在Milpitas时就去吃过一回，后来听说搬到San Mateo了，我贵州朋友大声安利我很久，昨晚叫上朋友杀了过去，菜单上菜不多，每一样都是精品！而且辣度都是不能调，主打一个个能吃吃不能吃也得吃😂总之爱吃辣喜欢云贵川口味的不要错过！\n·\n✨推荐：\n一定要点贵州烧椒鸡！鲜葱配贵州烧椒酱再加新鲜的鸡肉！一个字绝！那个酱汁鲜辣咸香，拌鞋底都好吃我们人均一碗米饭，最后听说这酱汁不单卖，把剩下的都打包回去准备第二天拌米饭，吃的时候一定要拌开，不要只吃鸡肉要跟葱和烧椒酱一起吃！\n·\n野生菌炖鸡汤：七种野生菌配上鲜炖鸡汤，就是鲜上加鲜！汤不油鸡肉不柴很Q弹，7种菌菇吸满了汤汁，再配特质柠檬蘸料绝了绝了…我们一边喝一边说实在太好喝😂$60一锅够四个人吃！很值！\n·\n贵州红酸汤吊龙米粉：也是不能调辣度！朋友一边被辣哭一边接着吃因为太好吃😂酸辣口夏天吃很开胃吊龙很嫩！\n·\n冷吃鸡脆骨：我特地问了是不是自己做的，店长说是他们自己做，来了美国吃到的最正宗冷吃鸡！老板不愧是四川人！下酒很🉑干嚼也好吃😋不辣很香\n·\n最近推出的炭火烧烤我们看着他用炭火烤、羊肉串和黑松露大虾是我在湾区吃到的Best！羊肉都是瘦肉，非常嫩，有炭火的特殊味道，黑松露大虾这个黑松露很香，虾肉很嫩！好吃！\n·\n包浆豆腐不是我印象中的口感有点像鱼豆腐，调味非常🉑，招牌辣牛骨米粉就是小香牛骨里面巨辣的那个！这里也能吃到！附近的朋友别错过！\n·\n包烧野生菌不是预制菜要25分钟才能吃上😂跟汤的是不同口味好吃！\n·\n这里车位是街趴不能找，服务挺好的，都来帮着搬开，加水，👌\n✨地址：123 W 25th Ave, San Mateo, CA 94403\n#湾区生活[话题]# #湾区美食[话题]# #湾区探店[话题]# #湾区美食测评[话题]# #湾区美食探店[话题]# #Sanmateo美食[话题]# #半岛美食[话题]##湾区美食湾区吃什么[话题]# #湾区云南菜[话题]# #湾区贵州菜[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/69fe7b4700000000380236bc?xsec_token=AB9URyYeWenhCKHgjUkNwHU2JiGKpcdhUn83S8sayYf1g%3D&xsec_source=", "hashtags": ["湾区生活", "湾区美食", "湾区探店", "湾区美食测评", "湾区美食探店", "Sanmateo美食", "半岛美食", "湾区美食湾区吃什么", "湾区云南菜", "湾区贵州菜"], "all_images": ["http://sns-webpic-qc.xhscdn.com/202605270646/695c9b331b96f349cabfb4038a702df5/notes_pre_post/1040g3k831vu6ag7lih304a35m4ejtdra2u54tt8!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/7233a93178468d3947a686317087f2ba/notes_pre_post/1040g3k831vu6ag7lih3g4a35m4ejtdran0at88o!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/dcd004ce3d7f46806c41ad6438455617/notes_pre_post/1040g3k831vu6ag7lih404a35m4ejtdramm9so58!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/6666eddf792cd038ca69411c631b86b0/notes_pre_post/1040g3k831vu6ag7lih4g4a35m4ejtdradla3jhg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/38008c5fefea5d4b12d290974bd45298/notes_pre_post/1040g3k831vu6ag7lih504a35m4ejtdra07aiir0!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/44ff3b04f81ddada2d9603eed7716ad0/notes_pre_post/1040g3k831vu6ag7lih5g4a35m4ejtdrau57f778!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/b625fd2af0786fcc7e7d2af2e3b27b6c/notes_pre_post/1040g3k831vu6ag7lih604a35m4ejtdraha50a28!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/9c38d5b22d32c666e22334425963edea/notes_pre_post/1040g3k831vu6ag7lih6g4a35m4ejtdrameuifmg!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/9c18d1c52a8c602b0289d2748e86900d/notes_pre_post/1040g3k831vu6ag7lih704a35m4ejtdra066k34g!nd_prv_wlteh_jpg_3", "http://sns-webpic-qc.xhscdn.com/202605270646/97d57d07a73a1a346ac0e3e46483ccbb/notes_pre_post/1040g3k831vu6ag7lih7g4a35m4ejtdra3rb7v4o!nd_prv_wlteh_jpg_3"], "video_url": "", "ip_location": "美国", "lat": null, "lng": null, "geocoded": false, "geo_source": "none", "geo_precise": false, "liked_count": 211, "collected_count": 270, "comment_count": 21, "posted_at": 1778285383000}, "e25": {"id": "e25", "name": "Caltrain 漫游", "url": "https://www.xiaohongshu.com/explore/6a2b83b30000000015026d13", "quote": "「Caltrain全站点通关｜湾区小火车逐站漫游🚞」", "description": "不开车也能玩半岛，挑两站下车随便逛逛特别松弛。", "neighborhood": null, "venue": null, "time_window": "周末", "price": "$", "themes": ["户外", "活动"], "thumbnail": "images/6a2b83b30000000015026d13.webp", "snippet": "", "full_text": "EP01｜Palo Alto站(1️⃣)\n\t\n终于开启了我的Caltrain全线打卡计划，我的第一站是久负盛名的斯坦福大学。\n\t\n历史: 1884年，利兰·斯坦福夫妇的独子15岁因伤寒病逝。悲痛之下，决定以儿子之名创办斯坦福大学。1885年成立，1891年正式招生。位于美国加州旧金山湾区南部Palo Alto，占地约33平方公里，是美国占地面积最大的大学之一。\n\t\n交通: Palo Alto站下车，在站台处免费搭乘X，Y线到Stanford University Campus或P线直达Stanford Oval。\n\t\n打卡顺序:\n①Stanford Oval(P1)\n校园中心巨大椭圆形草坪。中央花坛处用红色玫瑰花摆出大大的“S”，游客可以在那欣赏校门口通往校园的经典棕榈大道。\n②Main Quad (P2-3)\n在主方院可以见到斯坦福最经典的红瓦拱廊，随便拍摄都出片。\n③Memorial Church(P4-6)\n纪念教堂是专门用来纪念亡夫利兰·斯坦福，为校园的中心建筑，富丽堂皇的壁画和彩绘的玻璃，非常漂亮。\n④Green Library(P7)\n格林图书馆藏书量高达400万册，是斯坦福大学最大的图书馆，也是访客和学生心目中“最美图书馆”。\n⑤Hoover Tower(P8-9)\n胡佛塔是斯坦福地标建筑，登上塔顶($8)可以俯瞰整个校园及Palo Alto市的全景。\n⑥Arizona Garden(P10)\n仙人掌花园是一个沙漠植物园，在那仙人掌和多肉种类繁多。\n⑦Rodin Sculpture Garden(P11-12)\n罗丹雕塑园是除巴黎以外世界上最大的罗丹作品收藏地之一，那里有《地狱之门》和《思想者》等作品。\n⑧Cantor Arts Center(P13-15)\n坎特视觉艺术中心是校内一座文化和艺术的宝藏。展览涵盖了从古代到现代，从本地到全球的艺术品，免费参观，无需预约。（周一周二闭馆）\n⑨Stanford Dish Hiking Trail(P16-18)\n斯坦福Dish徒步步道全程5.6公里，在这可以360°俯瞰斯坦福校园，湾区天际尽收眼底。在这也🉑近距离看到野生火鸡。山顶巨型射电望远镜(The Dish)是必打卡的拍照点。\n(我们专程留出一天时间来走这个步道)\n\t\n#Caltrain[话题]# #斯坦福游玩[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/6a2b83b30000000015026d13?xsec_token=ABF4wFSTa0KmhUDC4eIO-8FzHFq591nmHIgTU6mCwSbu0%3D&xsec_source=", "hashtags": ["Caltrain", "斯坦福游玩"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606122307/5a24b5ec2e7936b5309dcb58d7a7c55f/1040g2sg321a5vq4lna705pjuhi30uaoe5dl6icg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/d1bac5a578060dcacb8fa2434f49d028/1040g2sg321a5vq4lna7g5pjuhi30uaoej334reo!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/a7c5ebbb55afedcd4b6c4f05482e97de/1040g2sg321a5vq4lna805pjuhi30uaoe7jljns0!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/344de3396c13ae8fc8112e13dd0a4297/1040g2sg321a5vq4lna8g5pjuhi30uaoeaif4a50!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/2223a36610d77c96631cb617ea79b238/1040g2sg321a5vq4lna905pjuhi30uaoegdd6ge0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/3ec2f917a2f3dd7648c744074363c716/1040g2sg321a5vq4lna9g5pjuhi30uaoe68i98bo!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/a42485cd53fdf46a930b1be45f303450/1040g2sg321a5vq4lnaa05pjuhi30uaoeak8jm10!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/81d3cfe0a3f78f3b8f94cacaa7855e26/1040g2sg321a5vq4lnaag5pjuhi30uaoe7nuups0!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/0543995fede7b82b141a94616d4f00a4/1040g2sg321a5vq4lnab05pjuhi30uaoe8mfv50o!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/3f3cb816ac9f752a906a0ebbe4434b1c/1040g2sg321a5vq4lnabg5pjuhi30uaoejqkac9o!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/c242a742b16d1fa8a7cd385aa820f74d/1040g2sg321a5vq4lnac05pjuhi30uaoe167sfo8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/3a7333d48462c85e5c151fde1329652c/1040g2sg321a5vq4lnacg5pjuhi30uaoecp1o38o!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/6101e128a6b6ca97ccd4cdeded5c8b90/1040g2sg321a5vq4lnad05pjuhi30uaoebkk7p9g!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/4feb42d9870b54c3b71a6fca092f9e68/1040g2sg321a5vq4lnadg5pjuhi30uaoe335k4h8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/625279422c0a2d377d05b5122c2ac102/1040g008321a5vq4lna005pjuhi30uaoe1qs8ecg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/5bde7efd9fcd490e53b586d25e7defbe/1040g008321a5vq4lna0g5pjuhi30uaoem42t4b0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/56b9aa2461040d4924153d4371da61bf/1040g008321a5vq4lna105pjuhi30uaoelkofpco!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/4dd6c75b6f1898fa12a511f2df6cdf73/1040g008321a5vq4lna1g5pjuhi30uaoevn9n50g!nd_prv_wgth_jpg_3?src=A"], "video_url": "", "ip_location": "美国", "lat": null, "lng": null, "geocoded": false, "geo_source": "none", "geo_precise": false, "liked_count": 7, "collected_count": 8, "posted_at": 1781236659000}, "e26": {"id": "e26", "name": "日式温泉餐厅", "url": "https://www.xiaohongshu.com/explore/67e75668000000001e000d77", "quote": "「旧金山｜日式温泉餐厅♨️一秒回到东京巷子里」", "description": "装修像东京小巷，怀石氛围下吃饭很有仪式感。", "neighborhood": "San Francisco", "venue": null, "time_window": null, "price": "$$$", "themes": ["美食"], "thumbnail": "images/67e75668000000001e000d77.webp", "snippet": "", "full_text": "在旧金山生活这么久\n终于等到Onsen Bath & Restaurant重开\n泡汤十级爱好者大感动😭\n身心放松+美食治愈\n这才是理想中的生活节奏\n\t\n这家隐藏在Tenderloin的日式温泉餐厅\n一进门还是熟悉的木质气息\n像穿越回东京巷子里的小澡堂\n温泉区依旧是日式传统风格\n泡汤还有干蒸、湿蒸\n环境安静又疗愈\n完美适合放松一整天的疲惫\n泡完汤直接去隔壁餐厅\n简直像回到日本居酒屋\n\t\n重点是浴室分男女分时段 也有包场服务\n非常适合和朋友或者情侣来chill一整晚！\n\t\n📍Onsen Bath & Restaurant\n466 Eddy St, San Francisco, CA\n❗️建议提前预约温泉+晚餐时间\n位置不多 很容易满\n\t\n#湾区周末去哪儿[话题]# #温泉[话题]# #旧金山[话题]# #湾区[话题]# #疗愈[话题]# #日式[话题]# #温泉[话题]# #日料[话题]# #吃喝玩乐[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/67e75668000000001e000d77?xsec_token=ABgtNzZdysUthyZT11GhgX0ApZEZpA6xpyB78si28k0dE%3D&xsec_source=", "hashtags": ["湾区周末去哪儿", "温泉", "旧金山", "湾区", "疗愈", "日式", "日料", "吃喝玩乐"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606120152/2678d3911e38913cfb0d7bf20df57e30/notes_pre_post/1040g3k831fjj8drhg2105n7a5gnk7prhhjn7apg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/0816110df40f7de651c09234f555e981/1040g00831m34eg9h5m005n7a5gnk7prhi49d9pg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/51195111bcac26c765bdb7a0e08d7b43/1040g00831m34eg9h5m1g5n7a5gnk7prhh2b1cr8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/931507746760cb3be175c8acca4909b1/notes_pre_post/1040g3k831fjj8drhg22g5n7a5gnk7prhtqg32r8!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/3d7a89406a67cf94f3dd5a98f2bed52a/1040g00831m34eg9h5m0g5n7a5gnk7prho73b9l8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/ef445dbfe2960d5c2f26715cf7a569d4/notes_pre_post/1040g3k831fjj8drhg23g5n7a5gnk7prhcgajvq8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/30837e4f6f4506021ec2cdc1e72b7ce8/notes_pre_post/1040g3k831fjj8drhg2405n7a5gnk7prh54no3k0!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/87e998f382ef88b86b2f6cfe5cb92eee/notes_pre_post/1040g3k831fjj8drhg24g5n7a5gnk7prhuhnv0m8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/07a7fb20e31ea73594b50495ddeadd83/notes_pre_post/1040g3k831fjj8drhg2505n7a5gnk7prhp4ub1v8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/c73340a5481c01bb9fbd4cc04dcc71d5/notes_pre_post/1040g3k831fjj8drhg25g5n7a5gnk7prh3kdir30!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/cfcbc46c0907e6497ef7f78481880eac/notes_pre_post/1040g3k831fjj8drhg2605n7a5gnk7prhlmsskk0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/d7ca4c4c82e8da558441d0457d210153/notes_pre_post/1040g3k831fjj8drhg26g5n7a5gnk7prhk6ea488!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/3e401cde9a6de54a2bc075ab125fdbb6/notes_pre_post/1040g3k831fjjcr0qg4705n7a5gnk7prhed1nct0!nd_prv_wgth_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/911aafba265030957884caee3531a514/notes_pre_post/1040g3k831fjjcr0qg47g5n7a5gnk7prh4boeqs0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606120152/a039d91c8322ad9d6304029251406684/1040g00831m34eg9h5m105n7a5gnk7prh4nkc4cg!nd_prv_wlteh_jpg_3?src=A"], "video_url": "", "ip_location": "", "lat": 37.7749295, "lng": -122.4194155, "geocoded": true, "geo_source": "google_neighborhood", "geo_precise": false, "neighborhood_canonical": "San Francisco, CA, USA", "liked_count": 486, "collected_count": 592, "comment_count": 17, "posted_at": 1743214184000}, "e27": {"id": "e27", "name": "森林图书馆", "url": "https://www.xiaohongshu.com/explore/686025d50000000022033b38", "quote": "「湾区Day Trip｜森林图书馆💦林间瀑布🦌小鹿」", "description": "红木林中的小图书馆配瀑布，最适合带书过去躺一下午。", "neighborhood": "Santa Cruz Mountains", "venue": "Sempervirens Point", "time_window": null, "price": "免费", "themes": ["户外", "宝藏地点"], "thumbnail": "images/686025d50000000022033b38.webp", "snippet": "", "full_text": "爸妈在的每个周末都在探索湾区周边\n发现一个行程满满当当\n可上山下海 还能偶遇灵性小动物\n又不会很累的Day Trip 宝藏路线\n—\n📖 Mill Valley Public Library\n📍 375 Throckmorton Ave, Mill Valley, CA\n被红杉树环绕的林间图书馆，有整片落地窗和窗边座椅，阳光洒在身上，听着鸟鸣，看书喝茶，不要太惬意。一楼是小镇历史展览馆，很多图册，还可以拿到🆓的明信片和小朋友手画书签\n—\n💦Cascade Falls Trail Head\n图书馆后面就是Old Mill Park。走路12min（开车3min）就可以看到这个小瀑布，可以走下去捡个石头[萌萌哒R]跨过潺潺小溪就可以在浓密的红杉林和各种惬意有创意的宅院里hiking，吸收负氧离子。非常幸运看到了耳朵巨大的小鹿跳出来看着我们，还有一只白鹭就降落在我们面前，好好运🍀 好多人出来遛狗，几乎看到了快30条修狗不要太快乐\n—\n🏖️Muir Beach\n📍 Unnamed Road, Muir Beach, CA 94965\n从图书馆开车15min就可以抵达这片被森林和悬崖围绕的海滩。令人惊叹的是过去的路是一层又一层上山的弯路，以为自己要到山顶了结果转角就看到大片清爽的海滩🏖️\n—\n👏整个day trip，早上11点多悠哉悠哉吃完早饭从南湾出发，玩到下午差不多6pm去旧金山吃个晚餐，再开回来简直不要太完美的周末[飞吻R]\n#湾区生活[话题]# #湾区周末[话题]# #北美生活[话题]# #湾区周末游[话题]# #湾区周末遛娃[话题]# #湾区周末去哪[话题]# #湾区周边[话题]# #湾区周边游[话题]# #湾区周边旅行[话题]# #湾区一日游[话题]#", "xsec_url": "https://www.xiaohongshu.com/explore/686025d50000000022033b38?xsec_token=ABCy9qTP93gkM5EVb36E8w6TaStnBQQ06Jd-Aemdir71Q%3D&xsec_source=", "hashtags": ["湾区生活", "湾区周末", "北美生活", "湾区周末游", "湾区周末遛娃", "湾区周末去哪", "湾区周边", "湾区周边游", "湾区周边旅行", "湾区一日游"], "all_images": ["http://sns-web-i10.rednotecdn.com/202606122307/80953b6e1d2eaffded8f5f014afae5ed/1040g2sg31j9iqfs72u0045dvebk0dekfieegi3g!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/ca48acd7be7e0d457e645e3b31384791/1040g2sg31j9iqfs72u0g45dvebk0dekft7b7cu8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/fa3a838473ab8c2e10747edd08eea3c0/1040g2sg31j9iqfs72u1045dvebk0dekfmuj37p0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/a56647fff2a023995fa19c2235f5d6cc/1040g2sg31j9iqfs72u1g45dvebk0dekffae029o!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/3152d747b15364ffe87cc753fdf43572/1040g2sg31j9iqfs72u2045dvebk0dekffo2qlno!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/53bd0d42df8be178cd8e3e4b9b556c7d/1040g2sg31j9iqfs72u2g45dvebk0dekf0u6h1io!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/57734ceca9123527ee6c11363929c047/1040g2sg31j9iqfs72u3045dvebk0dekfvqa9g0o!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/30188ca43533926e5b5ef79f4a47ae07/1040g2sg31j9iqfs72u3g45dvebk0dekfmulj99g!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/702b1b08a3342ab474390254140370e7/1040g2sg31j9iqfs72u4045dvebk0dekfqq1ba60!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/a206daaecfdb1154ca56e799ed681b8c/1040g2sg31j9iqfs72u4g45dvebk0dekf7hahsk0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/f1bd0162178010e36ac307536642113d/1040g2sg31j9iqfs72u5045dvebk0dekfo1em7a0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/d3bad4cba8820e649e121e359b9230ee/1040g2sg31j9iqfs72u5g45dvebk0dekf715h8a0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/258e927fb916de4f9997354613f29ff6/1040g2sg31j9iqfs72u6045dvebk0dekftbfill0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/e396dd34f62f95ce2039b1564993549f/1040g2sg31j9iqfs72u6g45dvebk0dekfd66voi8!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/2dfa3dd6b70346699cdb4902e3c4bdbd/1040g00831j9irgsq2u0045dvebk0dekfmdf01j0!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/968975c93f4074287316ed41e98aedb4/1040g00831j9irgsq2u0g45dvebk0dekfnvr44fo!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/c0d9ff1d992e82fa3dae777e17902959/1040g00831j9irgsq2u1045dvebk0dekf6limqkg!nd_prv_wlteh_jpg_3?src=A", "http://sns-web-i10.rednotecdn.com/202606122307/0ba1584345acd885d93d86ae1b7811d9/1040g00831j9irgsq2u1g45dvebk0dekfu8ook60!nd_prv_wlteh_jpg_3?src=A"], "video_url": "", "ip_location": "", "lat": 37.2449923, "lng": -122.145066, "geocoded": true, "geo_source": "google_venue", "geo_precise": true, "neighborhood_canonical": "Sempervirens Point Parking, Boulder Creek, CA 95006, USA", "comment_count": 13, "posted_at": 1751131605000}};
+    const MAP_POINTS = [{"id": "e2", "name": "San Mateo County Fair", "emoji": "🎉", "lat": 37.546808, "lng": -122.30191}, {"id": "e11", "name": "小猪赛跑", "emoji": "🎉", "lat": 37.544409, "lng": -122.30191}, {"id": "e3", "name": "莫奈画展", "emoji": "🎨", "lat": 37.772669, "lng": -122.468676}, {"id": "e5", "name": "Bouquets to Art", "emoji": "🎨", "lat": 37.770269, "lng": -122.468676}, {"id": "e4", "name": "盐田千春展", "emoji": "🎨", "lat": 37.7857182, "lng": -122.4010508}, {"id": "e6", "name": "斯坦福艺术展", "emoji": "🎨", "lat": 37.4329672, "lng": -122.1705266}, {"id": "e7", "name": "San Jose 美术馆", "emoji": "🎨", "lat": 37.3337262, "lng": -121.8899245}, {"id": "e8", "name": "侨批展", "emoji": "🏛️", "lat": 37.7938363, "lng": -122.408787}, {"id": "e9", "name": "Family Fun Day", "emoji": "🎉", "lat": 37.3813639, "lng": -122.1142578}, {"id": "e12", "name": "Land's End", "emoji": "🥾", "lat": 37.7774856, "lng": -122.4996397}, {"id": "e13", "name": "Rodeo Beach", "emoji": "🥾", "lat": 37.826294, "lng": -122.4996496}, {"id": "e14", "name": "Point Reyes", "emoji": "🥾", "lat": 38.083403, "lng": -122.7633036}, {"id": "e15", "name": "Dawn Ranch", "emoji": "🥾", "lat": 38.5014421, "lng": -123.0027558}, {"id": "e16", "name": "老钱小镇半日游", "emoji": "🥾", "lat": 37.4299388, "lng": -122.2538557}, {"id": "e17", "name": "Carolands 城堡", "emoji": "🏛️", "lat": 37.5553176, "lng": -122.3718564}, {"id": "e18", "name": "Jackson Square", "emoji": "🏛️", "lat": 37.7970411, "lng": -122.4031893}, {"id": "e19", "name": "Dogpatch", "emoji": "🍜", "lat": 37.76049829999999, "lng": -122.3886835}, {"id": "e20", "name": "The Interval", "emoji": "🍜", "lat": 37.8066031, "lng": -122.4321667}, {"id": "e21", "name": "$98 tasting menu", "emoji": "🍜", "lat": 37.776129, "lng": -122.419415}, {"id": "e22", "name": "Soralla", "emoji": "🍜", "lat": 37.77433, "lng": -122.418376}, {"id": "e26", "name": "日式温泉餐厅", "emoji": "🍜", "lat": 37.77433, "lng": -122.420455}, {"id": "e27", "name": "森林图书馆", "emoji": "🥾", "lat": 37.2449923, "lng": -122.145066}];
+    const RESTAURANT_API = "https://mammogram-doorbell-exorcist.ngrok-free.dev";
+    const RESTAURANT_AUTH_REQUIRED = true;
+    // Demo payloads baked in at build time (normalized name -> digest). Non-empty
+    // only for the published GitHub Pages build, which has no backend to call —
+    // searches resolve from here instead of fetching. Empty {} = live mode.
+    const RESTAURANT_DEMO = {};
+    const RESTAURANT_DEFAULT_LOCATION = '湾区';
+
+    function _rsSelectedLocation() {
+      const select = document.getElementById('rs-location-select');
+      const custom = document.getElementById('rs-location-custom');
+      const picked = select ? select.value : RESTAURANT_DEFAULT_LOCATION;
+      return (picked === '__custom__'
+        ? (custom && custom.value ? custom.value : '')
+        : picked || RESTAURANT_DEFAULT_LOCATION).trim();
+    }
+
+    function _rsSyncLocationInput() {
+      const select = document.getElementById('rs-location-select');
+      const custom = document.getElementById('rs-location-custom');
+      if (!select || !custom) return;
+      const isCustom = select.value === '__custom__';
+      custom.classList.toggle('hidden', !isCustom);
+      if (isCustom) setTimeout(() => custom.focus(), 0);
+    }
+
+    document.getElementById('rs-location-select')
+      ?.addEventListener('change', _rsSyncLocationInput);
+
+    function openSheet(id) {
+      const e = ENTITIES[id];
+      if (!e) return;
+      document.getElementById('sheet-quote').textContent = e.quote || '';
+      document.getElementById('sheet-desc').textContent  = e.description || '';
+
+      const textBody = e.full_text || e.snippet || '';
+      const textEl = document.getElementById('sheet-text');
+      textEl.textContent = textBody;
+      textEl.style.display = textBody ? '' : 'none';
+
+      const chips = [];
+      if (e.neighborhood) chips.push(['街区', e.neighborhood]);
+      if (e.time_window)  chips.push(['时间', e.time_window]);
+      if (e.price)        chips.push(['价位', e.price]);
+      document.getElementById('sheet-chips').innerHTML =
+        chips.map(([k,v]) =>
+          `<span class="bg-gray-100 text-gray-700 text-xs rounded-full px-2.5 py-0.5">${k} · ${v}</span>`
+        ).join('');
+
+      document.getElementById('sheet-tags').innerHTML =
+        (e.hashtags||[]).map(t =>
+          `<span class="bg-orange-50 rounded-full px-2 py-0.5">${t}</span>`
+        ).join('');
+
+      const img = document.getElementById('sheet-img');
+      if (e.thumbnail) { img.src = e.thumbnail; img.style.display = ''; }
+      else { img.style.display = 'none'; }
+
+      document.getElementById('sheet-link').href = e.xsec_url || e.url || '#';
+      const overlay = document.getElementById('sheet-overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSheet(ev) {
+      if (ev && ev.target.closest('#sheet-box')) return;
+      const overlay = document.getElementById('sheet-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    // Leaflet map — lazily initialized on first Map-tab activation, because the
+    // container is display:none until then and would size to 0x0 otherwise.
+    let _map = null;
+    function initMap() {
+      if (_map) return;
+      _map = L.map('leaflet-map', { scrollWheelZoom: true });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(_map);
+
+      const markers = [];
+      MAP_POINTS.forEach(pt => {
+        const icon = L.divIcon({
+          html: '<div class="map-pin">' + pt.emoji + '</div>',
+          className: '',
+          iconSize: [34, 34],
+          iconAnchor: [17, 17],
+        });
+        const marker = L.marker([pt.lat, pt.lng], { icon }).addTo(_map);
+        marker.bindTooltip(pt.name, { direction: 'top', offset: [0, -16] });
+        marker.on('click', () => openSheet(pt.id));
+        markers.push(marker);
+      });
+
+      if (markers.length) {
+        _map.fitBounds(L.featureGroup(markers).getBounds().pad(0.2));
+      } else {
+        _map.setView([37.8044, -122.2712], 9); // Bay Area fallback
+      }
+    }
+
+    // Tab switching. Pin click and inline-token click share openSheet() — one
+    // source of truth, two modes.
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (tab.classList.contains('disabled')) return;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const which = tab.dataset.tab;
+        document.getElementById('pane-read').classList.toggle('hidden', which !== 'read');
+        document.getElementById('pane-map').classList.toggle('hidden', which !== 'map');
+        const searchPane = document.getElementById('pane-search');
+        if (searchPane) searchPane.classList.add('hidden');
+        document.getElementById('snapshot-tabs')?.classList.remove('hidden');
+        document.querySelector('[data-app-tab="snapshot"]')?.classList.add('active');
+        document.querySelector('[data-app-tab="search"]')?.classList.remove('active');
+        if (which === 'map') {
+          initMap();
+          // Container just became visible; let Leaflet recompute its size.
+          if (_map) setTimeout(() => _map.invalidateSize(), 0);
+        }
+      });
+    });
+
+    function showApp(which) {
+      const snapshot = which !== 'search';
+      document.getElementById('pane-search')?.classList.toggle('hidden', snapshot);
+      document.getElementById('pane-read')?.classList.toggle('hidden', !snapshot);
+      document.getElementById('pane-map')?.classList.add('hidden');
+      document.getElementById('snapshot-tabs')?.classList.toggle('hidden', !snapshot);
+      document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`[data-app-tab="${snapshot ? 'snapshot' : 'search'}"]`)?.classList.add('active');
+      if (snapshot) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('[data-tab="read"]')?.classList.add('active');
+      } else {
+        setTimeout(() => document.getElementById('rs-input')?.focus(), 0);
+      }
+    }
+
+    document.querySelectorAll('.app-tab').forEach(tab => {
+      tab.addEventListener('click', () => showApp(tab.dataset.appTab));
+    });
+
+    document.getElementById('date-select')?.addEventListener('change', ev => {
+      const href = ev.target.value;
+      if (href) window.location.href = href;
+    });
+
+    if (new URLSearchParams(window.location.search).get('view') === 'search') {
+      showApp('search');
+    }
+
+    // The baked demo build (GitHub Pages) is all about restaurant search, so
+    // open straight on that tab instead of the daily-digest reading view.
+    if (Object.keys(RESTAURANT_DEMO || {}).length) {
+      showApp('search');
+      // Tune the search-box copy to whether a live backend is wired up.
+      const _names = Object.keys(RESTAURANT_DEMO).map(k => RESTAURANT_DEMO[k].name);
+      const _inp = document.getElementById('rs-input');
+      if (_inp && _names.length) _inp.placeholder = `试试「${_names[0]}」…`;
+      const _sub = document.getElementById('rs-subtext');
+      if (_sub && _names.length) {
+        _sub.textContent = RESTAURANT_API
+          ? `已收录 ${_names.join('、')}（秒开）；其它餐厅会实时去小红书汇总，首次约需 1-2 分钟。`
+          : `演示版：已收录 ${_names.join('、')} 的小红书口碑，输入店名即可查看。`;
+      }
+    }
+
+    // ---- Restaurant search (calls the local/hosted backend) ----------------
+    const _rsEsc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+    // A highlights / watch_outs section: an intro paragraph + bulleted points,
+    // each point optionally backed by a verbatim quote from a post/comment.
+    function _rsSection(title, icon, section, accent) {
+      section = section || {};
+      const points = section.points || [];
+      if (!section.intro && !points.length) return '';
+      const intro = section.intro
+        ? `<p class="text-gray-600 text-sm leading-relaxed mb-2">${_rsEsc(section.intro)}</p>` : '';
+      const bullets = points.map(p => {
+        const quote = p.quote
+          ? `<div class="mt-1 text-xs text-gray-500 italic border-l-2 ${accent.border} pl-2">“${_rsEsc(p.quote)}”</div>` : '';
+        return `<li class="flex gap-2 py-1">
+          <span class="${accent.dot} mt-1.5 h-1.5 w-1.5 rounded-full shrink-0"></span>
+          <div class="flex-1">
+            <div class="text-gray-700 text-sm leading-relaxed">${_rsEsc(p.text)}</div>
+            ${quote}
+          </div>
+        </li>`;
+      }).join('');
+      return `<div class="mt-5">
+        <h3 class="font-bold text-gray-900 mb-1">${icon} ${title}</h3>
+        ${intro}<ul>${bullets}</ul>
+      </div>`;
+    }
+
+    // Representative verbatim reviews, with like counts and source kind.
+    function _rsQuotes(quotes) {
+      if (!quotes || !quotes.length) return '';
+      const items = quotes.map(q => {
+        const meta = `<span class="text-[11px] text-gray-400 shrink-0">${
+          q.kind ? _rsEsc(q.kind) : ''}${q.likes ? ' ❤ ' + q.likes : ''}</span>`;
+        return `<div class="flex items-start justify-between gap-3 py-2 border-b border-gray-100 last:border-0">
+          <p class="text-gray-700 text-sm leading-relaxed flex-1">“${_rsEsc(q.text)}”</p>
+          ${meta}
+        </div>`;
+      }).join('');
+      return `<div class="mt-5">
+        <h3 class="font-bold text-gray-900 mb-1">💬 食客原声</h3>
+        <div class="bg-gray-50 rounded-lg px-3 py-1">${items}</div>
+      </div>`;
+    }
+
+    // XHS CDN images hotlink-check the referrer, so every <img> uses
+    // referrerpolicy="no-referrer" and hides itself if it still fails to load.
+    function _rsImg(url, cls, alt) {
+      return `<img src="${_rsEsc(url)}" alt="${_rsEsc(alt || '')}" loading="lazy"
+        referrerpolicy="no-referrer" class="${cls}"
+        onerror="this.style.display='none'">`;
+    }
+
+    // A horizontal photo strip of representative posts (the restaurant visual),
+    // placed *below* the summary/scorecard so it doesn't crowd the top.
+    function _rsGallery(g) {
+      if (!g || !g.length) return '';
+      const imgs = g.map(it =>
+        `<a href="${_rsEsc(it.link || it.post_url || '#')}" target="_blank" rel="noopener" class="shrink-0"
+           title="${_rsEsc(it.title)}">${_rsImg(it.url,
+           'h-28 w-28 object-cover rounded-lg bg-gray-100 hover:opacity-90 transition', it.title)}</a>`
+      ).join('');
+      return `<div class="mt-5">
+        <h3 class="font-bold text-gray-900 mb-1">📷 实拍</h3>
+        <div class="flex gap-2 overflow-x-auto pb-2">${imgs}</div>
+      </div>`;
+    }
+
+    // Per-dimension score bars (口味/服务/环境/性价比/颜值), laid out two-up so
+    // the scorecard stays compact. Rendered inside _rsScorecard, not standalone.
+    function _rsRatings(ratings) {
+      if (!ratings || !ratings.length) return '';
+      const rows = ratings.map(r => {
+        const pct = Math.max(0, Math.min(100, (r.score / 5) * 100));
+        return `<div class="flex items-center gap-2 py-0.5">
+          <span class="text-xs text-gray-500 w-12 shrink-0">${_rsEsc(r.dim)}</span>
+          <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div class="h-full bg-orange-400 rounded-full" style="width:${pct}%"></div>
+          </div>
+          <span class="text-xs text-gray-600 w-7 text-right tabular-nums">${r.score.toFixed(1)}</span>
+        </div>`;
+      }).join('');
+      return `<div class="grid sm:grid-cols-2 gap-x-5 gap-y-0.5">${rows}</div>`;
+    }
+
+    // Praise vs critique split bar — sits at the bottom of the scorecard panel.
+    function _rsSentiment(s) {
+      if (!s || (!s.praise && !s.critique)) return '';
+      return `<div class="mt-3 pt-3 border-t border-gray-200/70">
+        <div class="flex justify-between text-xs mb-1">
+          <span class="text-green-600 font-medium">👍 好评 ${s.praise}%</span>
+          <span class="text-amber-600 font-medium">${s.critique}% 吐槽 ⚠️</span>
+        </div>
+        <div class="flex h-2.5 rounded-full overflow-hidden bg-gray-100">
+          <div class="bg-green-400" style="width:${s.praise}%"></div>
+          <div class="bg-amber-400" style="width:${s.critique}%"></div>
+        </div>
+      </div>`;
+    }
+
+    // One consolidated 口碑概览 panel: an overall score, the per-dimension bars,
+    // and the praise/critique split — grouped so the page isn't a stack of
+    // separate widgets crammed under the title.
+    function _rsScorecard(ratings, sentiment) {
+      const grid = _rsRatings(ratings);
+      const senti = _rsSentiment(sentiment);
+      if (!grid && !senti) return '';
+      let overall = '';
+      if (ratings && ratings.length) {
+        const avg = ratings.reduce((a, r) => a + r.score, 0) / ratings.length;
+        overall = `<span class="text-sm font-bold text-orange-500 tabular-nums">综合 ${avg.toFixed(1)}</span>`;
+      }
+      return `<div class="mt-4 bg-gray-50 rounded-xl p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-bold text-gray-900">口碑概览</h3>
+          ${overall}
+        </div>
+        ${grid}${senti}
+      </div>`;
+    }
+
+    function _rsDish(d) {
+      const hot = d.popularity === '高';
+      const badge = `<span class="text-[10px] font-semibold rounded-full px-2 py-0.5 ${
+        hot ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-500'}">${
+        _rsEsc(d.popularity || '')}</span>`;
+      // Dish photos were dropped: the note→dish image mapping was unreliable
+      // (a post's hero image rarely matched the specific dish). A simple icon
+      // is more honest until we have a better way to pick the right photo.
+      return `<li class="flex items-start gap-3 py-2 border-b border-gray-100 last:border-0">
+        <span class="text-orange-500 mt-0.5">🍽️</span>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-gray-900 text-sm">${_rsEsc(d.name)}</span>${badge}
+          </div>
+          <div class="text-gray-500 text-xs mt-0.5">${_rsEsc(d.note || '')}</div>
+        </div>
+      </li>`;
+    }
+
+    function _rsSource(s) {
+      return `<a href="${_rsEsc(s.link || s.url || '#')}" target="_blank" rel="noopener"
+        class="block text-xs text-gray-500 hover:text-orange-600 truncate py-1">
+        ❤ ${s.liked_count || 0} · ${_rsEsc(s.title || '原帖')}</a>`;
+    }
+
+    function _rsFmtTime(sec) {
+      if (typeof sec !== 'number' || !Number.isFinite(sec)) return '';
+      if (sec < 60) return `${sec.toFixed(1)}s`;
+      const m = Math.floor(sec / 60);
+      const s = Math.round(sec - m * 60);
+      return `${m}m ${String(s).padStart(2, '0')}s`;
+    }
+
+    function _rsRender(d) {
+      if (!d.found) {
+        return `<div class="text-center text-gray-400 text-sm py-10">${_rsEsc(d.summary || '没有找到结果。')}</div>`;
+      }
+      const stats = d.stats || {};
+      const dishes = (d.top_dishes && d.top_dishes.length)
+        ? `<h3 class="font-bold text-gray-900 mt-5 mb-1">🍽️ 招牌菜推荐</h3>
+           <ul>${d.top_dishes.map(_rsDish).join('')}</ul>`
+        : '';
+      const scorecard = _rsScorecard(d.ratings, d.sentiment);
+      const gallery = _rsGallery(d.gallery);
+      const highlights = _rsSection('亮点', '👍', d.highlights,
+        {border: 'border-green-300', dot: 'bg-green-400'});
+      const watch = _rsSection('雷点', '⚠️', d.watch_outs,
+        {border: 'border-amber-300', dot: 'bg-amber-400'});
+      const quotes = _rsQuotes(d.quotes);
+      const sources = (d.sources && d.sources.length)
+        ? `<details class="mt-5"><summary class="text-xs text-gray-400 cursor-pointer">
+             参考帖子（${d.sources.length}）</summary><div class="mt-1">${d.sources.map(_rsSource).join('')}</div></details>` : '';
+      // Story-first order: lead with the human summary, then one grouped
+      // scorecard, then photos, then the qualitative sections.
+      return `<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-bold text-gray-900">${_rsEsc(d.name)}</h2>
+          <span class="text-xs text-gray-400">${_rsEsc(d.location || RESTAURANT_DEFAULT_LOCATION)} · ${stats.note_count || 0} 帖 · ${stats.comment_count || 0} 评论</span>
+        </div>
+        <p class="text-gray-700 text-sm leading-relaxed">${_rsEsc(d.summary)}</p>
+        ${scorecard}${gallery}${highlights}${watch}${quotes}${dishes}${sources}
+      </div>`;
+    }
+
+    // Progress card while the backend crawls/summarizes.
+    function _rsProgress(p) {
+      let label = '正在汇总…', sub = '', pct = 0, indeterminate = true;
+      const stages = ['searching', 'reading', 'summarizing'];
+      const stageLabels = ['搜索', '读帖子', '生成小结'];
+      const stageKey = p.stage === 'reading_posts' ? 'reading' : p.stage;
+      const activeIdx = Math.max(0, stages.indexOf(stageKey));
+      if (p.stage === 'searching') {
+        label = '正在搜索小红书…'; sub = '匹配相关帖子';
+      } else if (p.stage === 'reading' || p.stage === 'reading_posts') {
+        const total = p.total || 0, done = p.done || 0;
+        label = total ? `正在阅读帖子 ${done}/${total}` : '正在阅读帖子…';
+        sub = '读取正文、图片和高赞评论样本';
+        if (total) { pct = Math.round(done / total * 100); indeterminate = false; }
+      } else if (p.stage === 'summarizing') {
+        label = '正在生成口碑小结…'; sub = '综合帖子和高赞评论';
+      }
+      const bar = indeterminate
+        ? `<div class="h-1.5 bg-orange-100 rounded-full overflow-hidden">
+             <div class="h-full w-1/3 bg-orange-400 rounded-full animate-pulse"></div></div>`
+        : `<div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+             <div class="h-full bg-orange-400 rounded-full transition-all duration-300" style="width:${pct}%"></div></div>`;
+      const elapsed = _rsFmtTime(p.elapsed_sec);
+      const delta = _rsFmtTime(p.delta_sec);
+      const timeLine = elapsed
+        ? `<span>已用 ${elapsed}${delta ? ` · 本步 +${delta}` : ''}</span>`
+        : '';
+      const steps = `<div class="grid grid-cols-3 gap-1 mt-4">
+        ${stages.map((s, i) => {
+          const done = i < activeIdx;
+          const active = i === activeIdx;
+          const cls = done ? 'bg-green-50 text-green-700 border-green-200'
+            : active ? 'bg-orange-50 text-orange-700 border-orange-200'
+            : 'bg-gray-50 text-gray-400 border-gray-100';
+          return `<div class="${cls} border rounded-md px-1.5 py-1 text-[10px] text-center truncate">${stageLabels[i]}</div>`;
+        }).join('')}
+      </div>`;
+      return `<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="inline-block h-4 w-4 border-2 border-orange-400 border-t-transparent rounded-full animate-spin"></span>
+          <div class="min-w-0">
+            <div class="text-sm font-medium text-gray-800">${_rsEsc(label)}</div>
+            <div class="text-[11px] text-gray-400">${timeLine}</div>
+          </div>
+        </div>
+        ${bar}
+        ${steps}
+        <p class="text-xs text-gray-400 mt-2">${_rsEsc(sub)}</p>
+      </div>`;
+    }
+
+    function _rsError(detail, hint) {
+      return `<div class="text-center text-red-400 text-sm py-10">
+        查询失败：${_rsEsc(detail || '后端无响应')}<br/>
+        <span class="text-xs text-gray-400">${_rsEsc(hint || '确认本地后端 (server/app.py) 正在运行')}</span></div>`;
+    }
+
+    // Normalize like the backend cache key: lowercase + strip whitespace.
+    const _rsNorm = s => (s || '').toLowerCase().replace(/\s+/g, '');
+    const _rsKeyStorage = 'bay_area_digest_friend_key';
+
+    function _rsFriendKey(forcePrompt=false) {
+      let key = localStorage.getItem(_rsKeyStorage) || '';
+      if ((forcePrompt || RESTAURANT_AUTH_REQUIRED) && !key) {
+        key = (window.prompt('请输入访问口令') || '').trim();
+        if (key) localStorage.setItem(_rsKeyStorage, key);
+      }
+      return key;
+    }
+
+    function _rsHeaders() {
+      const headers = {'ngrok-skip-browser-warning': '1'};
+      const key = _rsFriendKey(false);
+      if (key) headers['X-Friend-Key'] = key;
+      return headers;
+    }
+
+    function _rsTimeoutSignal(ms) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), ms);
+      return {signal: ctrl.signal, done: () => clearTimeout(timer)};
+    }
+
+    async function _rsShortFetch(url, options={}) {
+      const t = _rsTimeoutSignal(20000);
+      try {
+        return await fetch(url, {...options, signal: t.signal});
+      } catch (e) {
+        if (e && e.name === 'AbortError') throw new Error('后端响应超时，请重试');
+        throw e;
+      } finally {
+        t.done();
+      }
+    }
+
+    async function _rsAuthedJson(makeRequest) {
+      let res = await makeRequest();
+      if (res.status === 401) {
+        localStorage.removeItem(_rsKeyStorage);
+        const key = _rsFriendKey(true);
+        if (key) res = await makeRequest();
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const err = new Error(data.detail || data.error || (res.status === 401 ? '访问口令不正确' : '后端无响应'));
+        err.hint = data.hint;
+        throw err;
+      }
+      return data;
+    }
+
+    async function _rsStartJob(name, location) {
+      return await _rsAuthedJson(() => _rsShortFetch(`${RESTAURANT_API}/api/restaurant/jobs`, {
+        method: 'POST',
+        headers: {..._rsHeaders(), 'Content-Type': 'application/json'},
+        body: JSON.stringify({name, location}),
+      }));
+    }
+
+    async function _rsGetJob(id) {
+      return await _rsAuthedJson(() => _rsShortFetch(`${RESTAURANT_API}/api/restaurant/jobs/${encodeURIComponent(id)}`, {
+        headers: _rsHeaders(),
+      }));
+    }
+
+    function _rsSleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function _rsJobProgress(job) {
+      const p = job.progress || {};
+      return {
+        stage: job.stage || job.status || 'working',
+        done: p.done || 0,
+        total: p.total || 0,
+      };
+    }
+
+    async function _rsPollJob(job, box) {
+      const deadline = Date.now() + 180000;
+      while (job && job.status !== 'done') {
+        if (job.status === 'error' || job.status === 'timeout') {
+          const err = new Error(job.detail || job.error || '查询失败，请重试');
+          err.hint = job.hint;
+          throw err;
+        }
+        if (!job.id) throw new Error('查询任务不存在，请重试');
+        if (Date.now() > deadline) throw new Error('查询还在后台运行，请稍后重试');
+        box.innerHTML = _rsProgress(_rsJobProgress(job));
+        await _rsSleep(1500);
+        job = await _rsGetJob(job.id);
+      }
+      if (!job || !job.result) throw new Error('查询没有返回结果，请重试');
+      return job.result;
+    }
+
+    async function _rsLiveStream(name, location, box, refresh=false) {
+      const params = new URLSearchParams({name, location});
+      if (refresh) params.set('refresh', '1');
+      const url = `${RESTAURANT_API}/api/restaurant/stream?${params.toString()}`;
+      let res = await fetch(url, {headers: _rsHeaders()});
+      if (res.status === 401) {
+        localStorage.removeItem(_rsKeyStorage);
+        _rsFriendKey(true);
+        res = await fetch(url, {headers: _rsHeaders()});
+      }
+      if (!res.ok || !res.body) {
+        const data = await res.json().catch(() => ({}));
+        const err = new Error(data.detail || data.error || '后端无响应');
+        err.hint = data.hint;
+        throw err;
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '', latest = null;
+      while (true) {
+        const {value, done} = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, {stream: true});
+        const lines = buf.split('\n');
+        buf = lines.pop() || '';
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const msg = JSON.parse(line);
+          if (msg.stage === 'error') {
+            const err = new Error(msg.detail || '查询失败');
+            err.hint = msg.hint;
+            throw err;
+          }
+          if (msg.payload) {
+            latest = msg.payload;
+            box.innerHTML = _rsRender(latest);
+          } else {
+            box.innerHTML = _rsProgress(msg);
+          }
+        }
+      }
+      if (!latest) throw new Error('查询没有返回结果，请重试');
+      return latest;
+    }
+
+    async function searchRestaurant(ev) {
+      ev.preventDefault();
+      const name = document.getElementById('rs-input').value.trim();
+      const location = _rsSelectedLocation();
+      const box = document.getElementById('rs-result');
+      const refresh = Boolean(document.getElementById('rs-refresh')?.checked)
+        || new URLSearchParams(window.location.search).get('restaurant_refresh') === '1';
+      if (!name) return false;
+      if (!location) {
+        box.innerHTML = _rsError('请选择或输入城市/地区');
+        return false;
+      }
+
+      // Baked payloads (if any) are an instant cache: a hit renders with no
+      // network call, even when a live backend is configured.
+      const demoNames = Object.keys(RESTAURANT_DEMO || {});
+      const cached = RESTAURANT_DEMO[_rsNorm(name)];
+      if (cached && !refresh && location === RESTAURANT_DEFAULT_LOCATION) {
+        box.innerHTML = _rsRender(cached);
+        return false;
+      }
+
+      // Not in the cache. If no backend is wired up, this is a pure demo build —
+      // tell the user what's available instead of failing on a dead fetch.
+      if (!RESTAURANT_API) {
+        const labels = demoNames.map(k => RESTAURANT_DEMO[k].name).join('、');
+        box.innerHTML = `<div class="text-center text-gray-500 text-sm py-10">
+          这是<strong>演示版</strong>，目前只收录了：<br/>
+          <span class="text-orange-600 font-medium">${_rsEsc(labels)}</span><br/>
+          <span class="text-xs text-gray-400 mt-2 inline-block">试试输入上面的店名</span></div>`;
+        return false;
+      }
+
+      // A backend is configured (e.g. your laptop behind an HTTPS tunnel).
+      // Start a short-lived job request, then poll status while the Mac mini
+      // keeps the RedNote browser crawl running in the background.
+      box.innerHTML = _rsProgress({stage: 'searching'});
+      try {
+        if (window.ReadableStream) {
+          await _rsLiveStream(name, location, box, refresh);
+        } else {
+          const job = await _rsStartJob(name, location);
+          const data = await _rsPollJob(job, box);
+          box.innerHTML = _rsRender(data);
+        }
+      } catch (e) {
+        box.innerHTML = _rsError(String(e).replace(/^Error:\s*/, ''), e.hint);
+      }
+      return false;
+    }
+  </script>
 </body>
 </html>
