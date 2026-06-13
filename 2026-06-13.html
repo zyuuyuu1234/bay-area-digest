@@ -697,11 +697,11 @@
       return data;
     }
 
-    async function _rsStartJob(name, location) {
+    async function _rsStartJob(name, location, refresh=false) {
       return await _rsAuthedJson(() => _rsShortFetch(`${RESTAURANT_API}/api/restaurant/jobs`, {
         method: 'POST',
         headers: {..._rsHeaders(), 'Content-Type': 'application/json'},
-        body: JSON.stringify({name, location}),
+        body: JSON.stringify({name, location, refresh}),
       }));
     }
 
@@ -825,13 +825,9 @@
       // keeps the RedNote browser crawl running in the background.
       box.innerHTML = _rsProgress({stage: 'searching'});
       try {
-        if (window.ReadableStream) {
-          await _rsLiveStream(name, location, box, refresh);
-        } else {
-          const job = await _rsStartJob(name, location);
-          const data = await _rsPollJob(job, box);
-          box.innerHTML = _rsRender(data);
-        }
+        const job = await _rsStartJob(name, location, refresh);
+        const data = await _rsPollJob(job, box);
+        box.innerHTML = _rsRender(data);
       } catch (e) {
         box.innerHTML = _rsError(String(e).replace(/^Error:\s*/, ''), e.hint);
       }
