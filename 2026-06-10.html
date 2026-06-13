@@ -44,6 +44,12 @@
     .tab:hover:not(.disabled){color:#374151;}
     .tab.active{color:#ea580c; border-bottom-color:#ea580c;}
     .tab.disabled{color:#d1d5db; cursor:not-allowed;}
+    .app-tab{
+      border:1px solid #e5e7eb; border-radius:9999px;
+      padding:0.25rem 0.75rem; color:#9ca3af; transition:all .15s;
+    }
+    .app-tab:hover{color:#374151; border-color:#9ca3af;}
+    .app-tab.active{color:#ea580c; border-color:#fed7aa; background:#fff7ed;}
     .section-heading{
       font-size:1.25rem; font-weight:700; color:#111827;
       margin-bottom:0.75rem; letter-spacing:-0.01em;
@@ -58,16 +64,37 @@
     <div class="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
       <div>
         <span class="text-lg font-bold text-gray-900">🌉 湾区每日探索</span>
-        <span class="ml-2 text-sm text-gray-400">2026年6月10日</span>
+        <select id="date-select"
+                class="ml-2 text-xs text-gray-500 border border-gray-200 rounded-full px-2.5 py-1 bg-white
+                       focus:outline-none focus:border-orange-300">
+          <option value="index.html">2026-06-13</option>
+          <option value="2026-06-12.html">2026-06-12</option>
+          <option value="2026-06-11.html">2026-06-11</option>
+          <option value="2026-06-10.html" selected>2026-06-10</option>
+          <option value="2026-06-06.html">2026-06-06</option>
+          <option value="2026-06-02.html">2026-06-02</option>
+          <option value="2026-06-01.html">2026-06-01</option>
+          <option value="2026-05-30.html">2026-05-30</option>
+          <option value="2026-05-28.html">2026-05-28</option>
+          <option value="2026-05-27.html">2026-05-27</option>
+          <option value="2026-05-26.html">2026-05-26</option>
+          <option value="2026-05-25.html">2026-05-25</option>
+          <option value="2026-05-22.html">2026-05-22</option>
+          <option value="2026-05-21.html">2026-05-21</option>
+          <option value="2026-05-20.html">2026-05-20</option>
+        </select>
       </div>
-      <a href="index.html"
-         class="text-xs text-gray-400 hover:text-gray-700 border border-gray-200
-                rounded-full px-3 py-1 hover:border-gray-400 transition-colors">往期 →</a>
+      <nav class="flex items-center gap-2 text-xs">
+        <a href="index.html"
+           class="text-gray-400 hover:text-gray-700 border border-gray-200
+                  rounded-full px-3 py-1 hover:border-gray-400 transition-colors">往期</a>
+        <button type="button" class="app-tab active" data-app-tab="snapshot">每日快照</button>
+        <button type="button" class="app-tab" data-app-tab="search">餐厅搜索</button>
+      </nav>
     </div>
-    <div class="max-w-2xl mx-auto px-4 flex gap-1 border-t border-gray-100">
+    <div id="snapshot-tabs" class="max-w-2xl mx-auto px-4 flex gap-1 border-t border-gray-100">
       <div class="tab active" data-tab="read">阅读</div>
       <div class="tab" data-tab="map">地图</div>
-      <div class="tab" data-tab="search">美食搜索</div>
     </div>
   </header>
 
@@ -107,18 +134,60 @@
       <p class="text-xs text-gray-400 text-center mt-3">另有 6 个推荐无固定地点，见「阅读」视图</p>
     </div>
     <div id="pane-search" class="hidden">
-      <form id="rs-form" class="flex gap-2" onsubmit="return searchRestaurant(event)">
-        <input id="rs-input" type="text" autocomplete="off"
-               placeholder="输入餐厅名，如「Z & Y」「家全七福」…"
-               class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm
-                      focus:outline-none focus:border-orange-400"/>
-        <button type="submit"
-                class="bg-orange-500 hover:bg-orange-600 text-white font-semibold
-                       rounded-xl px-5 py-3 text-sm transition-colors whitespace-nowrap">搜索</button>
+      <form id="rs-form" class="bg-white border border-gray-100 shadow-sm rounded-xl p-3"
+            onsubmit="return searchRestaurant(event)">
+        <div class="grid grid-cols-[1fr_auto] gap-2">
+          <input id="rs-input" type="text" autocomplete="off"
+                 placeholder="输入餐厅名，如「Z & Y」「家全七福」…"
+                 class="min-w-0 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm
+                        focus:outline-none focus:border-orange-400"/>
+          <button type="submit"
+                  class="bg-orange-500 hover:bg-orange-600 text-white font-semibold
+                         rounded-lg px-4 py-2.5 text-sm transition-colors whitespace-nowrap">搜索</button>
+        </div>
+        <div class="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-gray-500">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400 whitespace-nowrap">城市/地区</span>
+            <select id="rs-location-select"
+                    class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs bg-gray-50
+                           focus:outline-none focus:border-orange-400">
+            <option value="湾区" selected>湾区</option>
+            <option value="纽约">纽约</option>
+            <option value="洛杉矶">洛杉矶</option>
+            <option value="伦敦">伦敦</option>
+            <option value="东京">东京</option>
+            <option value="巴黎">巴黎</option>
+            <option value="新加坡">新加坡</option>
+            <option value="香港">香港</option>
+            <option value="上海">上海</option>
+            <option value="北京">北京</option>
+            <option value="台北">台北</option>
+            <option value="首尔">首尔</option>
+            <option value="曼谷">曼谷</option>
+            <option value="悉尼">悉尼</option>
+            <option value="墨尔本">墨尔本</option>
+            <option value="多伦多">多伦多</option>
+            <option value="温哥华">温哥华</option>
+            <option value="芝加哥">芝加哥</option>
+            <option value="迪拜">迪拜</option>
+            <option value="__custom__">自定义…</option>
+            </select>
+          </div>
+          <input id="rs-location-custom" type="text" autocomplete="off"
+                 placeholder="输入城市或地区"
+                 class="hidden sm:max-w-[15rem] border border-gray-200 rounded-lg px-3 py-2 text-xs
+                        focus:outline-none focus:border-orange-400"/>
+        </div>
       </form>
       <p id="rs-subtext" class="text-xs text-gray-400 mt-2">
         实时汇总小红书上的帖子与评论，生成口碑小结与招牌菜推荐（首次查询约需 1-2 分钟）。
       </p>
+      <label class="mt-3 inline-flex items-center gap-2 text-xs text-gray-500 select-none">
+        <input id="rs-refresh" type="checkbox"
+               class="h-3.5 w-3.5 rounded border-gray-300 text-orange-500
+                      focus:ring-orange-400"/>
+        <span>重新抓取</span>
+      </label>
       <div id="rs-result" class="mt-5"></div>
     </div>
   </main>
@@ -162,6 +231,28 @@
     // only for the published GitHub Pages build, which has no backend to call —
     // searches resolve from here instead of fetching. Empty {} = live mode.
     const RESTAURANT_DEMO = {};
+    const RESTAURANT_DEFAULT_LOCATION = '湾区';
+
+    function _rsSelectedLocation() {
+      const select = document.getElementById('rs-location-select');
+      const custom = document.getElementById('rs-location-custom');
+      const picked = select ? select.value : RESTAURANT_DEFAULT_LOCATION;
+      return (picked === '__custom__'
+        ? (custom && custom.value ? custom.value : '')
+        : picked || RESTAURANT_DEFAULT_LOCATION).trim();
+    }
+
+    function _rsSyncLocationInput() {
+      const select = document.getElementById('rs-location-select');
+      const custom = document.getElementById('rs-location-custom');
+      if (!select || !custom) return;
+      const isCustom = select.value === '__custom__';
+      custom.classList.toggle('hidden', !isCustom);
+      if (isCustom) setTimeout(() => custom.focus(), 0);
+    }
+
+    document.getElementById('rs-location-select')
+      ?.addEventListener('change', _rsSyncLocationInput);
 
     function openSheet(id) {
       const e = ENTITIES[id];
@@ -249,23 +340,52 @@
         const which = tab.dataset.tab;
         document.getElementById('pane-read').classList.toggle('hidden', which !== 'read');
         document.getElementById('pane-map').classList.toggle('hidden', which !== 'map');
-        document.getElementById('pane-search').classList.toggle('hidden', which !== 'search');
+        const searchPane = document.getElementById('pane-search');
+        if (searchPane) searchPane.classList.add('hidden');
+        document.getElementById('snapshot-tabs')?.classList.remove('hidden');
+        document.querySelector('[data-app-tab="snapshot"]')?.classList.add('active');
+        document.querySelector('[data-app-tab="search"]')?.classList.remove('active');
         if (which === 'map') {
           initMap();
           // Container just became visible; let Leaflet recompute its size.
           if (_map) setTimeout(() => _map.invalidateSize(), 0);
         }
-        if (which === 'search') {
-          setTimeout(() => document.getElementById('rs-input').focus(), 0);
-        }
       });
     });
+
+    function showApp(which) {
+      const snapshot = which !== 'search';
+      document.getElementById('pane-search')?.classList.toggle('hidden', snapshot);
+      document.getElementById('pane-read')?.classList.toggle('hidden', !snapshot);
+      document.getElementById('pane-map')?.classList.add('hidden');
+      document.getElementById('snapshot-tabs')?.classList.toggle('hidden', !snapshot);
+      document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`[data-app-tab="${snapshot ? 'snapshot' : 'search'}"]`)?.classList.add('active');
+      if (snapshot) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('[data-tab="read"]')?.classList.add('active');
+      } else {
+        setTimeout(() => document.getElementById('rs-input')?.focus(), 0);
+      }
+    }
+
+    document.querySelectorAll('.app-tab').forEach(tab => {
+      tab.addEventListener('click', () => showApp(tab.dataset.appTab));
+    });
+
+    document.getElementById('date-select')?.addEventListener('change', ev => {
+      const href = ev.target.value;
+      if (href) window.location.href = href;
+    });
+
+    if (new URLSearchParams(window.location.search).get('view') === 'search') {
+      showApp('search');
+    }
 
     // The baked demo build (GitHub Pages) is all about restaurant search, so
     // open straight on that tab instead of the daily-digest reading view.
     if (Object.keys(RESTAURANT_DEMO || {}).length) {
-      const _t = document.querySelector('.tab[data-tab="search"]');
-      if (_t) _t.click();
+      showApp('search');
       // Tune the search-box copy to whether a live backend is wired up.
       const _names = Object.keys(RESTAURANT_DEMO).map(k => RESTAURANT_DEMO[k].name);
       const _inp = document.getElementById('rs-input');
@@ -424,6 +544,14 @@
         ❤ ${s.liked_count || 0} · ${_rsEsc(s.title || '原帖')}</a>`;
     }
 
+    function _rsFmtTime(sec) {
+      if (typeof sec !== 'number' || !Number.isFinite(sec)) return '';
+      if (sec < 60) return `${sec.toFixed(1)}s`;
+      const m = Math.floor(sec / 60);
+      const s = Math.round(sec - m * 60);
+      return `${m}m ${String(s).padStart(2, '0')}s`;
+    }
+
     function _rsRender(d) {
       if (!d.found) {
         return `<div class="text-center text-gray-400 text-sm py-10">${_rsEsc(d.summary || '没有找到结果。')}</div>`;
@@ -448,39 +576,60 @@
       return `<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-lg font-bold text-gray-900">${_rsEsc(d.name)}</h2>
-          <span class="text-xs text-gray-400">${stats.note_count || 0} 帖 · ${stats.comment_count || 0} 评论</span>
+          <span class="text-xs text-gray-400">${_rsEsc(d.location || RESTAURANT_DEFAULT_LOCATION)} · ${stats.note_count || 0} 帖 · ${stats.comment_count || 0} 评论</span>
         </div>
         <p class="text-gray-700 text-sm leading-relaxed">${_rsEsc(d.summary)}</p>
         ${scorecard}${gallery}${highlights}${watch}${quotes}${dishes}${sources}
       </div>`;
     }
 
-    // Progress card while the backend crawls/summarizes. Public pages use the
-    // plain JSON endpoint for stability; the streaming helper below is kept for
-    // local/debug flows where live per-note progress is useful.
+    // Progress card while the backend crawls/summarizes.
     function _rsProgress(p) {
       let label = '正在汇总…', sub = '', pct = 0, indeterminate = true;
+      const stages = ['searching', 'reading', 'summarizing'];
+      const stageLabels = ['搜索', '读帖子', '生成小结'];
+      const stageKey = p.stage === 'reading_posts' ? 'reading' : p.stage;
+      const activeIdx = Math.max(0, stages.indexOf(stageKey));
       if (p.stage === 'searching') {
         label = '正在搜索小红书…'; sub = '匹配相关帖子';
-      } else if (p.stage === 'reading') {
+      } else if (p.stage === 'reading' || p.stage === 'reading_posts') {
         const total = p.total || 0, done = p.done || 0;
-        label = total ? `正在阅读帖子与评论 ${done}/${total}` : '正在阅读帖子与评论…';
-        sub = '读取正文、点赞与高赞评论';
+        label = total ? `正在阅读帖子 ${done}/${total}` : '正在阅读帖子…';
+        sub = '读取正文、图片和高赞评论样本';
         if (total) { pct = Math.round(done / total * 100); indeterminate = false; }
       } else if (p.stage === 'summarizing') {
-        label = '正在生成口碑小结…'; sub = '综合点赞高的真实评价';
+        label = '正在生成口碑小结…'; sub = '综合帖子和高赞评论';
       }
       const bar = indeterminate
         ? `<div class="h-1.5 bg-orange-100 rounded-full overflow-hidden">
              <div class="h-full w-1/3 bg-orange-400 rounded-full animate-pulse"></div></div>`
         : `<div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
              <div class="h-full bg-orange-400 rounded-full transition-all duration-300" style="width:${pct}%"></div></div>`;
+      const elapsed = _rsFmtTime(p.elapsed_sec);
+      const delta = _rsFmtTime(p.delta_sec);
+      const timeLine = elapsed
+        ? `<span>已用 ${elapsed}${delta ? ` · 本步 +${delta}` : ''}</span>`
+        : '';
+      const steps = `<div class="grid grid-cols-3 gap-1 mt-4">
+        ${stages.map((s, i) => {
+          const done = i < activeIdx;
+          const active = i === activeIdx;
+          const cls = done ? 'bg-green-50 text-green-700 border-green-200'
+            : active ? 'bg-orange-50 text-orange-700 border-orange-200'
+            : 'bg-gray-50 text-gray-400 border-gray-100';
+          return `<div class="${cls} border rounded-md px-1.5 py-1 text-[10px] text-center truncate">${stageLabels[i]}</div>`;
+        }).join('')}
+      </div>`;
       return `<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <div class="flex items-center gap-3 mb-3">
           <span class="inline-block h-4 w-4 border-2 border-orange-400 border-t-transparent rounded-full animate-spin"></span>
-          <span class="text-sm font-medium text-gray-800">${_rsEsc(label)}</span>
+          <div class="min-w-0">
+            <div class="text-sm font-medium text-gray-800">${_rsEsc(label)}</div>
+            <div class="text-[11px] text-gray-400">${timeLine}</div>
+          </div>
         </div>
         ${bar}
+        ${steps}
         <p class="text-xs text-gray-400 mt-2">${_rsEsc(sub)}</p>
       </div>`;
     }
@@ -517,102 +666,145 @@
       return {signal: ctrl.signal, done: () => clearTimeout(timer)};
     }
 
-    async function _rsFetchJson(name) {
-      const request = async () => {
-        const t = _rsTimeoutSignal(150000);
-        try {
-          return await fetch(`${RESTAURANT_API}/api/restaurant?name=${encodeURIComponent(name)}`, {
-            headers: _rsHeaders(),
-            signal: t.signal,
-          });
-        } catch (e) {
-          if (e && e.name === 'AbortError') throw new Error('查询超时，请重试');
-          throw e;
-        } finally {
-          t.done();
-        }
-      };
-      let res = await request();
-      if (res.status === 401) {
-        localStorage.removeItem(_rsKeyStorage);
-        const key = _rsFriendKey(true);
-        if (key) res = await request();
-      }
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.detail || data.error || (res.status === 401 ? '访问口令不正确' : '后端无响应'));
-      }
-      return data;
-    }
-
-    async function _rsFetchStream(name, box) {
-      const t = _rsTimeoutSignal(150000);
+    async function _rsShortFetch(url, options={}) {
+      const t = _rsTimeoutSignal(20000);
       try {
-        let res = await fetch(`${RESTAURANT_API}/api/restaurant/stream?name=${encodeURIComponent(name)}`, {
-          headers: _rsHeaders(),
-          signal: t.signal,
-        });
-        if (res.status === 401) {
-          localStorage.removeItem(_rsKeyStorage);
-          const key = _rsFriendKey(true);
-          if (key) {
-            res = await fetch(`${RESTAURANT_API}/api/restaurant/stream?name=${encodeURIComponent(name)}`, {
-              headers: _rsHeaders(),
-              signal: t.signal,
-            });
-          }
-        }
-        if (!res.ok || !res.body) {
-          let detail = res.status === 401 ? '访问口令不正确' : '后端无响应';
-          try {
-            const err = await res.json();
-            detail = err.detail || err.error || detail;
-          } catch (_) {}
-          throw new Error(detail);
-        }
-        const reader = res.body.getReader();
-        const dec = new TextDecoder();
-        let buf = '', finished = false;
-        while (true) {
-          const {value, done} = await reader.read();
-          if (done) break;
-          buf += dec.decode(value, {stream: true});
-          let nl;
-          while ((nl = buf.indexOf('\n')) >= 0) {
-            const line = buf.slice(0, nl).trim();
-            buf = buf.slice(nl + 1);
-            if (!line) continue;
-            let evt;
-            try { evt = JSON.parse(line); } catch (_) { continue; }
-            if (evt.stage === 'done') {
-              box.innerHTML = _rsRender(evt.payload); finished = true;
-            } else if (evt.stage === 'error') {
-              box.innerHTML = _rsError(evt.detail, evt.hint); finished = true;
-            } else {
-              box.innerHTML = _rsProgress(evt);
-            }
-          }
-        }
-        if (!finished) throw new Error('查询中断，请重试');
+        return await fetch(url, {...options, signal: t.signal});
       } catch (e) {
-        if (e && e.name === 'AbortError') throw new Error('查询超时，请重试');
+        if (e && e.name === 'AbortError') throw new Error('后端响应超时，请重试');
         throw e;
       } finally {
         t.done();
       }
     }
 
+    async function _rsAuthedJson(makeRequest) {
+      let res = await makeRequest();
+      if (res.status === 401) {
+        localStorage.removeItem(_rsKeyStorage);
+        const key = _rsFriendKey(true);
+        if (key) res = await makeRequest();
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const err = new Error(data.detail || data.error || (res.status === 401 ? '访问口令不正确' : '后端无响应'));
+        err.hint = data.hint;
+        throw err;
+      }
+      return data;
+    }
+
+    async function _rsStartJob(name, location, refresh=false) {
+      return await _rsAuthedJson(() => _rsShortFetch(`${RESTAURANT_API}/api/restaurant/jobs`, {
+        method: 'POST',
+        headers: {..._rsHeaders(), 'Content-Type': 'application/json'},
+        body: JSON.stringify({name, location, refresh}),
+      }));
+    }
+
+    async function _rsGetJob(id) {
+      return await _rsAuthedJson(() => _rsShortFetch(`${RESTAURANT_API}/api/restaurant/jobs/${encodeURIComponent(id)}`, {
+        headers: _rsHeaders(),
+      }));
+    }
+
+    function _rsSleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function _rsJobProgress(job) {
+      const p = job.progress || {};
+      return {
+        stage: job.stage || job.status || 'working',
+        done: p.done || 0,
+        total: p.total || 0,
+      };
+    }
+
+    async function _rsPollJob(job, box) {
+      const deadline = Date.now() + 180000;
+      while (job && job.status !== 'done') {
+        if (job.status === 'error' || job.status === 'timeout') {
+          const err = new Error(job.detail || job.error || '查询失败，请重试');
+          err.hint = job.hint;
+          throw err;
+        }
+        if (!job.id) throw new Error('查询任务不存在，请重试');
+        if (Date.now() > deadline) throw new Error('查询还在后台运行，请稍后重试');
+        box.innerHTML = _rsProgress(_rsJobProgress(job));
+        await _rsSleep(1500);
+        job = await _rsGetJob(job.id);
+      }
+      if (!job || !job.result) throw new Error('查询没有返回结果，请重试');
+      return job.result;
+    }
+
+    async function _rsLiveStream(name, location, box, refresh=false) {
+      const params = new URLSearchParams({name, location});
+      if (refresh) params.set('refresh', '1');
+      const url = `${RESTAURANT_API}/api/restaurant/stream?${params.toString()}`;
+      let res = await fetch(url, {headers: _rsHeaders()});
+      if (res.status === 401) {
+        localStorage.removeItem(_rsKeyStorage);
+        _rsFriendKey(true);
+        res = await fetch(url, {headers: _rsHeaders()});
+      }
+      if (!res.ok || !res.body) {
+        const data = await res.json().catch(() => ({}));
+        const err = new Error(data.detail || data.error || '后端无响应');
+        err.hint = data.hint;
+        throw err;
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '', latest = null;
+      while (true) {
+        const {value, done} = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, {stream: true});
+        const lines = buf.split('\n');
+        buf = lines.pop() || '';
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const msg = JSON.parse(line);
+          if (msg.stage === 'error') {
+            const err = new Error(msg.detail || '查询失败');
+            err.hint = msg.hint;
+            throw err;
+          }
+          if (msg.payload) {
+            latest = msg.payload;
+            box.innerHTML = _rsRender(latest);
+          } else {
+            box.innerHTML = _rsProgress(msg);
+          }
+        }
+      }
+      if (!latest) throw new Error('查询没有返回结果，请重试');
+      return latest;
+    }
+
     async function searchRestaurant(ev) {
       ev.preventDefault();
       const name = document.getElementById('rs-input').value.trim();
+      const location = _rsSelectedLocation();
       const box = document.getElementById('rs-result');
+      const refresh = Boolean(document.getElementById('rs-refresh')?.checked)
+        || new URLSearchParams(window.location.search).get('restaurant_refresh') === '1';
       if (!name) return false;
+      if (!location) {
+        box.innerHTML = _rsError('请选择或输入城市/地区');
+        return false;
+      }
 
       // Baked payloads (if any) are an instant cache: a hit renders with no
       // network call, even when a live backend is configured.
       const demoNames = Object.keys(RESTAURANT_DEMO || {});
       const cached = RESTAURANT_DEMO[_rsNorm(name)];
-      if (cached) { box.innerHTML = _rsRender(cached); return false; }
+      if (cached && !refresh && location === RESTAURANT_DEFAULT_LOCATION) {
+        box.innerHTML = _rsRender(cached);
+        return false;
+      }
 
       // Not in the cache. If no backend is wired up, this is a pure demo build —
       // tell the user what's available instead of failing on a dead fetch.
@@ -625,16 +817,16 @@
         return false;
       }
 
-      // A backend is configured (e.g. your laptop behind an HTTPS tunnel) — do a
-      // real live lookup for anything not already cached. Use the plain JSON
-      // endpoint first: minimized/background browser tabs are much more likely
-      // to interrupt long-lived streamed fetches.
+      // A backend is configured (e.g. your laptop behind an HTTPS tunnel).
+      // Start a short-lived job request, then poll status while the Mac mini
+      // keeps the RedNote browser crawl running in the background.
       box.innerHTML = _rsProgress({stage: 'searching'});
       try {
-        const data = await _rsFetchJson(name);
+        const job = await _rsStartJob(name, location, refresh);
+        const data = await _rsPollJob(job, box);
         box.innerHTML = _rsRender(data);
       } catch (e) {
-        box.innerHTML = _rsError(String(e).replace(/^Error:\s*/, ''));
+        box.innerHTML = _rsError(String(e).replace(/^Error:\s*/, ''), e.hint);
       }
       return false;
     }
